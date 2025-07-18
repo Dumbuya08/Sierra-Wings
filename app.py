@@ -30,17 +30,19 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Route to home
+@app.route("/")
+def home():
+    return render_template('index.html')  # Make sure templates/index.html exists
+
 # Initialize extensions with app
 db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
-init_mail(app)
 
-# Home route
-@app.route('/')
-def home():
-    return render_template('index.html')  # Make sure 'templates/index.html' exists
+# Initialize Flask-Mail
+init_mail(app)
 
 # User loader for Flask-Login
 @login_manager.user_loader
@@ -56,7 +58,7 @@ def register_blueprints():
     from routes_announcement import announcement_bp
     from routes_voice_checklist import voice_checklist
     from routes_feedback import feedback_bp
-    import routes_updates  # Ensure this exists and has route definitions
+    import routes_updates
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -65,16 +67,16 @@ def register_blueprints():
     app.register_blueprint(voice_checklist)
     app.register_blueprint(feedback_bp)
 
-# Initialize database structure
+# Function to initialize database structure
 def init_database():
     import models
     import models_extensions
-    with app.app_context():
-        db.create_all()
-    logging.info("SierraWings database initialized")
-
-if __name__ == '__main__':
+    db.create_all()
     register_blueprints()
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port)
+    logging.info("SierraWings database initialized for production")
 
+# Run the app
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 10000))
+    register_blueprints()
+    app.run(host='0.0.0.0', port=port)
