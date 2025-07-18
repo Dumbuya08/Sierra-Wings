@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Feedback Management - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Feedback Management</h1>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-comments fa-2x text-primary mb-2"></i>
+                            <h3>{{ total_feedback }}</h3>
+                            <p class="text-muted">Total Feedback</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                            <h3>{{ pending_feedback }}</h3>
+                            <p class="text-muted">Pending</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-eye fa-2x text-info mb-2"></i>
+                            <h3>{{ reviewed_feedback }}</h3>
+                            <p class="text-muted">Reviewed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h3>{{ resolved_feedback }}</h3>
+                            <p class="text-muted">Resolved</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filters and Sorting -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Filter by Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="all" {% if current_status == 'all' %}selected{% endif %}>All Status</option>
+                                <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="reviewed" {% if current_status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                                <option value="resolved" {% if current_status == 'resolved' %}selected{% endif %}>Resolved</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sort" class="form-label">Sort by</label>
+                            <select name="sort" id="sort" class="form-select">
+                                <option value="created_at" {% if current_sort == 'created_at' %}selected{% endif %}>Date</option>
+                                <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Rating</option>
+                                <option value="status" {% if current_sort == 'status' %}selected{% endif %}>Status</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="order" class="form-label">Order</label>
+                            <select name="order" id="order" class="form-select">
+                                <option value="desc" {% if current_order == 'desc' %}selected{% endif %}>Descending</option>
+                                <option value="asc" {% if current_order == 'asc' %}selected{% endif %}>Ascending</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Feedback List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> All Feedback
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if feedback_list %}
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User</th>
+                                        <th>Subject</th>
+                                        <th>Rating</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for feedback in feedback_list %}
+                                    <tr>
+                                        <td>#{{ feedback.id }}</td>
+                                        <td>
+                                            {{ feedback.user.first_name or feedback.user.username }}
+                                            <small class="text-muted">({{ feedback.user.role }})</small>
+                                        </td>
+                                        <td>{{ feedback.subject }}</td>
+                                        <td>
+                                            {% for i in range(1, 6) %}
+                                                {% if i <= feedback.rating %}
+                                                    <i class="fas fa-star text-warning"></i>
+                                                {% else %}
+                                                    <i class="far fa-star text-muted"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if feedback.category == 'bug_report' else 'success' if feedback.category == 'feature_request' else 'info' }}">
+                                                {{ feedback.category.replace('_', ' ').title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'warning' if feedback.status == 'pending' else 'info' if feedback.status == 'reviewed' else 'success' }}">
+                                                {{ feedback.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>{{ feedback.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#feedbackModal{{ feedback.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                            <h5>No feedback found</h5>
+                            <p class="text-muted">No feedback matches your current filters.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modals -->
+{% for feedback in feedback_list %}
+<div class="modal fade" id="feedbackModal{{ feedback.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Feedback #{{ feedback.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>User:</strong> {{ feedback.user.first_name or feedback.user.username }} ({{ feedback.user.role }})
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Date:</strong> {{ feedback.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Rating:</strong>
+                        {% for i in range(1, 6) %}
+                            {% if i <= feedback.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-muted"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Category:</strong>
+                        <span class="badge bg-{{ 'danger' if feedback.category == 'bug_report' else 'success' if feedback.category == 'feature_request' else 'info' }}">
+                            {{ feedback.category.replace('_', ' ').title() }}
+                        </span>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Subject:</strong> {{ feedback.subject }}
+                </div>
+                <div class="mb-3">
+                    <strong>Message:</strong>
+                    <div class="border rounded p-3 bg-light">
+                        {{ feedback.message }}
+                    </div>
+                </div>
+                
+                {% if feedback.admin_response %}
+                <div class="mb-3">
+                    <strong>Admin Response:</strong>
+                    <div class="border rounded p-3 bg-info bg-opacity-10">
+                        {{ feedback.admin_response }}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('update_feedback_status', feedback_id=feedback.id) }}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="status{{ feedback.id }}" class="form-label">Status</label>
+                            <select name="status" id="status{{ feedback.id }}" class="form-select">
+                                <option value="pending" {% if feedback.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="reviewed" {% if feedback.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                                <option value="resolved" {% if feedback.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label for="admin_response{{ feedback.id }}" class="form-label">Admin Response</label>
+                        <textarea name="admin_response" id="admin_response{{ feedback.id }}" class="form-control" rows="3" placeholder="Optional response to the user...">{{ feedback.admin_response or '' }}</textarea>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Update Feedback</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comments me-2"></i>
+                        Send Feedback
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if success %}
+                        <div class="alert alert-success" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {{ success }}
+                        </div>
+                    {% endif %}
+                    
+                    {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            {{ error }}
+                        </div>
+                    {% endif %}
+                    
+                    <p class="text-muted">
+                        We value your feedback! Help us improve SierraWings by sharing your thoughts, suggestions, or reporting any issues you've encountered.
+                    </p>
+                    
+                    <form method="POST" id="feedbackForm">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ name or '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Your Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ email or '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Your Message</label>
+                            <textarea class="form-control" id="message" name="message" 
+                                      rows="5" required placeholder="Share your feedback, suggestions, or report issues...">{{ message or '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-secondary me-md-2" onclick="history.back()">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Send Feedback
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+});
+</script>
+{% endblock %}

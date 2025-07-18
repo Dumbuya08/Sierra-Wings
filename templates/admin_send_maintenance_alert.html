@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Send Maintenance Alert - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <!-- Admin Sidebar -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user-shield"></i> Admin Panel</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{{ url_for('user_management') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users"></i> User Management
+                </a>
+                <a href="{{ url_for('drone_management') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-drone"></i> Drone Management
+                </a>
+                <a href="{{ url_for('maintenance_alerts') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-exclamation-triangle"></i> Maintenance Alerts
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-paper-plane"></i> Send Maintenance Alert</h2>
+            <a href="{{ url_for('maintenance_alerts') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Alerts
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-edit"></i> Create Maintenance Alert</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Alert Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       placeholder="e.g., System Update in Progress" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="alert_type" class="form-label">Alert Type *</label>
+                                <select class="form-select" id="alert_type" name="alert_type" required>
+                                    <option value="scheduled">Scheduled Maintenance</option>
+                                    <option value="emergency">Emergency Maintenance</option>
+                                    <option value="completed">Maintenance Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Alert Message *</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" 
+                                  placeholder="Describe the maintenance activity and its impact..." required></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="start_time" class="form-label">Start Time (optional)</label>
+                                <input type="datetime-local" class="form-control" id="start_time" name="start_time">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="end_time" class="form-label">End Time (optional)</label>
+                                <input type="datetime-local" class="form-control" id="end_time" name="end_time">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Email Preview:</strong> This alert will be sent to all active users via email with role-specific messaging.
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('maintenance_alerts') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> Send Alert to All Users
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Alert Templates -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-template"></i> Common Alert Templates</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">System Update</h6>
+                                <p class="card-text small">We are performing a system update to improve performance and add new features.</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('system_update')">Use Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Database Maintenance</h6>
+                                <p class="card-text small">Scheduled database maintenance to optimize system performance.</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('database_maintenance')">Use Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Security Update</h6>
+                                <p class="card-text small">Important security updates to protect your data.</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('security_update')">Use Template</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Server Migration</h6>
+                                <p class="card-text small">Migrating to more powerful servers for better performance.</p>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('server_migration')">Use Template</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function useTemplate(templateType) {
+    const templates = {
+        'system_update': {
+            title: 'System Update in Progress',
+            message: 'We are performing a system update to improve performance and add new features. The platform will be temporarily unavailable during this time.',
+            alert_type: 'scheduled'
+        },
+        'database_maintenance': {
+            title: 'Database Maintenance',
+            message: 'Scheduled database maintenance is being performed to optimize system performance. All data remains secure during this process.',
+            alert_type: 'scheduled'
+        },
+        'security_update': {
+            title: 'Security Enhancement',
+            message: 'We are implementing important security updates to protect your data and improve system security.',
+            alert_type: 'scheduled'
+        },
+        'server_migration': {
+            title: 'Server Migration',
+            message: 'We are migrating to more powerful servers to provide better service reliability and faster response times.',
+            alert_type: 'scheduled'
+        }
+    };
+    
+    if (templates[templateType]) {
+        document.getElementById('title').value = templates[templateType].title;
+        document.getElementById('message').value = templates[templateType].message;
+        document.getElementById('alert_type').value = templates[templateType].alert_type;
+        
+        // Set default times (15 minutes from now, 2 hours duration)
+        const now = new Date();
+        const startTime = new Date(now.getTime() + 15 * 60000); // 15 minutes from now
+        const endTime = new Date(startTime.getTime() + 2 * 60 * 60000); // 2 hours duration
+        
+        document.getElementById('start_time').value = startTime.toISOString().slice(0, 16);
+        document.getElementById('end_time').value = endTime.toISOString().slice(0, 16);
+    }
+}
+</script>
+{% endblock %}

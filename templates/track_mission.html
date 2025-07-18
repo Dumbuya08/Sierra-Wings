@@ -1,0 +1,662 @@
+{% extends "base.html" %}
+
+{% block title %}Track Mission #{{ mission.id }} - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Mission Details -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Mission #{{ mission.id }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mission-status mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Status:</span>
+                            <span class="badge bg-{{ 'success' if mission.status == 'completed' else 'warning' if mission.status == 'in_progress' else 'primary' if mission.status == 'accepted' else 'secondary' }}">
+                                {{ mission.status.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mission-details">
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Type:</strong></div>
+                            <div class="col-8">{{ mission.mission_type.title() }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Priority:</strong></div>
+                            <div class="col-8">
+                                <span class="badge bg-{{ 'danger' if mission.priority == 'emergency' else 'warning' if mission.priority == 'high' else 'info' }}">
+                                    {{ mission.priority.title() }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Requested:</strong></div>
+                            <div class="col-8">{{ mission.requested_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        </div>
+                        {% if mission.started_at %}
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Started:</strong></div>
+                            <div class="col-8">{{ mission.started_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        </div>
+                        {% endif %}
+                        {% if mission.completed_at %}
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Completed:</strong></div>
+                            <div class="col-8">{{ mission.completed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="medical-info">
+                        <h6>Medical Items</h6>
+                        <p>{{ mission.medical_items }}</p>
+                        
+                        {% if mission.prescription_number %}
+                        <h6>Prescription</h6>
+                        <p>{{ mission.prescription_number }}</p>
+                        {% endif %}
+                        
+                        {% if mission.special_instructions %}
+                        <h6>Special Instructions</h6>
+                        <p>{{ mission.special_instructions }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="addresses">
+                        <h6>Pickup Address</h6>
+                        <p class="text-muted">{{ mission.pickup_address }}</p>
+                        
+                        <h6>Delivery Address</h6>
+                        <p class="text-muted">{{ mission.delivery_address }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drone Info -->
+            {% if mission.drone %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-drone"></i> Assigned Drone
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="drone-info">
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Name:</strong></div>
+                            <div class="col-8">{{ mission.drone.name }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Model:</strong></div>
+                            <div class="col-8">{{ mission.drone.model }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Battery:</strong></div>
+                            <div class="col-8">
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-{{ 'success' if mission.drone.battery_level > 70 else 'warning' if mission.drone.battery_level > 30 else 'danger' }}" 
+                                         style="width: {{ mission.drone.battery_level }}%">
+                                        {{ mission.drone.battery_level }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><strong>Status:</strong></div>
+                            <div class="col-8">
+                                <span class="badge bg-{{ 'success' if mission.drone.status == 'available' else 'warning' if mission.drone.status == 'in_flight' else 'danger' }}">
+                                    {{ mission.drone.status.replace('_', ' ').title() }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Live Telemetry -->
+            {% if mission.drone and mission.status in ['assigned', 'in_progress'] %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-satellite"></i> Live Telemetry
+                        <span class="badge bg-success" id="telemetryStatus">Live</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="telemetryData">
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Altitude:</strong></div>
+                            <div class="col-6"><span id="altitude">--</span> m</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Speed:</strong></div>
+                            <div class="col-6"><span id="speed">--</span> m/s</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Signal:</strong></div>
+                            <div class="col-6"><span id="signal">--</span>%</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Flight Mode:</strong></div>
+                            <div class="col-6"><span id="flightMode">--</span></div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><strong>Armed:</strong></div>
+                            <div class="col-6"><span id="armed">--</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Live Map -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map"></i> Live Tracking
+                        <button class="btn btn-sm btn-outline-primary ms-2" onclick="centerMap()">
+                            <i class="fas fa-crosshairs"></i> Center
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary ms-2" onclick="toggleFullscreen()">
+                            <i class="fas fa-expand"></i> Fullscreen
+                        </button>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="trackingMap" style="height: 500px;"></div>
+                    <div class="p-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-user-circle"></i> <strong>Your Location:</strong> <span id="user-location-status">Getting location...</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-drone"></i> <strong>Drone Status:</strong> <span id="drone-status">Tracking...</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-route"></i> <strong>Distance:</strong> <span id="mission-distance">Calculating...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mission Timeline -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock"></i> Mission Timeline
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item {{ 'completed' if mission.requested_at else 'pending' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Request Submitted</h6>
+                                <p>{{ mission.requested_at.strftime('%Y-%m-%d %H:%M:%S') if mission.requested_at else 'Pending' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {{ 'completed' if mission.assigned_clinic_id else 'pending' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Clinic Review</h6>
+                                <p>{{ 'Approved by clinic' if mission.assigned_clinic_id else 'Waiting for clinic approval' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {{ 'completed' if mission.drone_id else 'pending' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Drone Assigned</h6>
+                                <p>{{ mission.drone.name if mission.drone else 'Waiting for drone assignment' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {{ 'completed' if mission.started_at else 'pending' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Mission Started</h6>
+                                <p>{{ mission.started_at.strftime('%Y-%m-%d %H:%M:%S') if mission.started_at else 'Pending' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="timeline-item {{ 'completed' if mission.completed_at else 'pending' }}">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6>Delivery Completed</h6>
+                                <p>{{ mission.completed_at.strftime('%Y-%m-%d %H:%M:%S') if mission.completed_at else 'In progress' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let trackingMap;
+let droneMarker;
+let userMarker;
+let pickupMarker;
+let deliveryMarker;
+let flightPath;
+let connectionLine;
+let telemetryInterval;
+let locationWatchId;
+let currentUserLocation = null;
+let droneLocation = null;
+
+// Initialize map
+function initMap() {
+    // Default to Freetown, Sierra Leone
+    const defaultCenter = [{{ mission.pickup_lat or 8.4606 }}, {{ mission.pickup_lon or -13.2317 }}];
+    
+    trackingMap = L.map('trackingMap').setView(defaultCenter, 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(trackingMap);
+    
+    // Add pickup marker
+    {% if mission.pickup_lat and mission.pickup_lon %}
+    pickupMarker = L.marker([{{ mission.pickup_lat }}, {{ mission.pickup_lon }}], {
+        icon: L.divIcon({
+            className: 'custom-marker pickup-marker',
+            html: '<i class="fas fa-hospital text-primary"></i>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        })
+    }).addTo(trackingMap).bindPopup('Pickup Location');
+    {% endif %}
+    
+    // Add delivery marker
+    {% if mission.delivery_lat and mission.delivery_lon %}
+    deliveryMarker = L.marker([{{ mission.delivery_lat }}, {{ mission.delivery_lon }}], {
+        icon: L.divIcon({
+            className: 'custom-marker delivery-marker',
+            html: '<i class="fas fa-home text-success"></i>',
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        })
+    }).addTo(trackingMap).bindPopup('Delivery Location');
+    {% endif %}
+    
+    // Initialize flight path
+    flightPath = L.polyline([], {
+        color: 'blue',
+        weight: 3,
+        opacity: 0.7
+    }).addTo(trackingMap);
+    
+    // Fit map to show all markers
+    {% if mission.pickup_lat and mission.pickup_lon and mission.delivery_lat and mission.delivery_lon %}
+    const group = new L.featureGroup([pickupMarker, deliveryMarker]);
+    trackingMap.fitBounds(group.getBounds().pad(0.1));
+    {% endif %}
+}
+
+// Update drone position
+function updateDronePosition(lat, lon, heading) {
+    droneLocation = { lat, lng: lon };
+    
+    if (droneMarker) {
+        trackingMap.removeLayer(droneMarker);
+    }
+    
+    droneMarker = L.marker([lat, lon], {
+        icon: L.divIcon({
+            className: 'custom-marker drone-marker',
+            html: `<i class="fas fa-drone text-warning" style="transform: rotate(${heading}deg);"></i>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15]
+        })
+    }).addTo(trackingMap).bindPopup(`<b>{{ mission.drone.name if mission.drone else "Drone" }}</b><br>Live position<br>Updated: ${new Date().toLocaleTimeString()}`);
+    
+    // Add to flight path
+    flightPath.addLatLng([lat, lon]);
+    
+    // Update connection line
+    updateConnectionLine();
+}
+
+// Get user's real location and start tracking
+function getUserLocationAndTrack() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                
+                currentUserLocation = { lat, lng };
+                
+                // Add user marker
+                const userIcon = L.divIcon({
+                    html: '<i class="fas fa-user-circle text-primary" style="font-size: 24px;"></i>',
+                    iconSize: [30, 30],
+                    className: 'user-icon'
+                });
+                
+                userMarker = L.marker([lat, lng], { icon: userIcon })
+                    .addTo(trackingMap)
+                    .bindPopup(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m`);
+                
+                // Add accuracy circle
+                L.circle([lat, lng], {
+                    color: 'blue',
+                    fillColor: '#30f',
+                    fillOpacity: 0.1,
+                    radius: accuracy
+                }).addTo(trackingMap);
+                
+                // Update status
+                document.getElementById('user-location-status').textContent = 
+                    `Located (±${Math.round(accuracy)}m accuracy)`;
+                
+                // Start location watching
+                startLocationWatching();
+                
+                // Update connection line
+                updateConnectionLine();
+            },
+            function(error) {
+                console.error('Geolocation error:', error);
+                document.getElementById('user-location-status').textContent = 
+                    'Location access denied or unavailable';
+                
+                // Use default location
+                currentUserLocation = { lat: 8.4606, lng: -11.7799 };
+                const userIcon = L.divIcon({
+                    html: '<i class="fas fa-user-circle text-primary" style="font-size: 24px;"></i>',
+                    iconSize: [30, 30],
+                    className: 'user-icon'
+                });
+                
+                userMarker = L.marker([8.4606, -11.7799], { icon: userIcon })
+                    .addTo(trackingMap)
+                    .bindPopup('<b>Default Location</b><br/>Enable location for accurate tracking');
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000
+            }
+        );
+    }
+}
+
+// Start location watching
+function startLocationWatching() {
+    if (navigator.geolocation) {
+        locationWatchId = navigator.geolocation.watchPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                
+                currentUserLocation = { lat, lng };
+                
+                // Update user marker
+                if (userMarker) {
+                    userMarker.setLatLng([lat, lng]);
+                    userMarker.setPopupContent(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m<br/>Updated: ${new Date().toLocaleTimeString()}`);
+                }
+                
+                // Update status
+                document.getElementById('user-location-status').textContent = 
+                    `Located (±${Math.round(accuracy)}m) - Updated: ${new Date().toLocaleTimeString()}`;
+                
+                // Update connection line
+                updateConnectionLine();
+            },
+            function(error) {
+                console.error('Location watching error:', error);
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 30000,
+                maximumAge: 60000
+            }
+        );
+    }
+}
+
+// Update connection line between user and drone
+function updateConnectionLine() {
+    if (currentUserLocation && droneLocation) {
+        // Remove existing connection line
+        if (connectionLine) {
+            trackingMap.removeLayer(connectionLine);
+        }
+        
+        // Create new connection line
+        connectionLine = L.polyline([
+            [currentUserLocation.lat, currentUserLocation.lng],
+            [droneLocation.lat, droneLocation.lng]
+        ], {
+            color: '#ffc107',
+            weight: 3,
+            opacity: 0.8,
+            dashArray: '10, 5'
+        }).addTo(trackingMap);
+        
+        // Calculate and display distance
+        const distance = calculateDistance(
+            currentUserLocation.lat, currentUserLocation.lng,
+            droneLocation.lat, droneLocation.lng
+        );
+        
+        document.getElementById('mission-distance').textContent = `${distance.toFixed(1)} km`;
+    }
+}
+
+// Calculate distance between two points
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+// Simulate drone movement for demonstration
+function simulateDroneMovement() {
+    if (currentUserLocation) {
+        const time = Date.now() / 10000;
+        const lat = currentUserLocation.lat + Math.sin(time) * 0.01;
+        const lng = currentUserLocation.lng + Math.cos(time) * 0.01;
+        
+        updateDronePosition(lat, lng, time * 50);
+        
+        // Update status
+        document.getElementById('drone-status').textContent = 'In Flight - Live Tracking';
+        
+        // Simulate telemetry
+        const simulatedTelemetry = {
+            altitude: Math.round(50 + Math.sin(time) * 20),
+            speed: Math.round(15 + Math.cos(time) * 5),
+            signal_strength: Math.round(85 + Math.sin(time * 2) * 15),
+            flight_mode: 'AUTO',
+            armed: true
+        };
+        
+        updateTelemetry(simulatedTelemetry);
+    }
+}
+
+// Center map on drone
+function centerMap() {
+    if (droneMarker) {
+        trackingMap.setView(droneMarker.getLatLng(), 15);
+    }
+}
+
+// Toggle fullscreen
+function toggleFullscreen() {
+    const mapContainer = document.getElementById('trackingMap');
+    if (mapContainer.requestFullscreen) {
+        mapContainer.requestFullscreen();
+    }
+}
+
+// Update telemetry data
+function updateTelemetry(data) {
+    document.getElementById('altitude').textContent = data.altitude || '--';
+    document.getElementById('speed').textContent = data.speed || '--';
+    document.getElementById('signal').textContent = data.signal_strength || '--';
+    document.getElementById('flightMode').textContent = data.flight_mode || '--';
+    document.getElementById('armed').textContent = data.armed ? 'Yes' : 'No';
+    
+    // Update drone position if available
+    if (data.latitude && data.longitude) {
+        updateDronePosition(data.latitude, data.longitude, data.heading || 0);
+    }
+}
+
+// Fetch telemetry data
+function fetchTelemetry() {
+    {% if mission.drone and mission.status in ['assigned', 'in_progress'] %}
+    fetch(`/api/telemetry?mission_id={{ mission.id }}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.telemetry && data.telemetry.length > 0) {
+                const latest = data.telemetry[0];
+                updateTelemetry(latest);
+                updateDronePosition(latest.latitude, latest.longitude, latest.heading || 0);
+                document.getElementById('telemetryStatus').textContent = 'Live';
+                document.getElementById('telemetryStatus').className = 'badge bg-success';
+            } else {
+                // Use simulation if no real telemetry data
+                simulateDroneMovement();
+                document.getElementById('telemetryStatus').textContent = 'Demo';
+                document.getElementById('telemetryStatus').className = 'badge bg-warning';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching telemetry:', error);
+            // Use simulation on error
+            simulateDroneMovement();
+            document.getElementById('telemetryStatus').textContent = 'Demo';
+            document.getElementById('telemetryStatus').className = 'badge bg-warning';
+        });
+    {% endif %}
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    
+    // Get user location and start tracking
+    getUserLocationAndTrack();
+    
+    // Start telemetry updates
+    {% if mission.drone and mission.status in ['assigned', 'in_progress'] %}
+    fetchTelemetry();
+    setInterval(fetchTelemetry, 2000); // Update every 2 seconds
+    {% else %}
+    // Start simulation even if no active mission
+    setTimeout(function() {
+        setInterval(simulateDroneMovement, 2000);
+    }, 3000); // Start after 3 seconds to allow location to be set
+    {% endif %}
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (locationWatchId) {
+        navigator.geolocation.clearWatch(locationWatchId);
+    }
+});
+</script>
+
+<style>
+.custom-marker {
+    background: white;
+    border: 2px solid #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 0;
+    bottom: -20px;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item.completed::before {
+    background: #28a745;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -36px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    background: #dee2e6;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.timeline-item.completed .timeline-marker {
+    background: #28a745;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.timeline-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}

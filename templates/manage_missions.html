@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Missions - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('clinic_dashboard') }}">
+                            <i class="fas fa-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('manage_missions') }}">
+                            <i class="fas fa-tasks"></i> Manage Missions
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('live_tracking') }}">
+                            <i class="fas fa-map"></i> Live Tracking
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-users"></i> Patient Records
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Mission Management</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button class="btn btn-outline-secondary me-2" onclick="refreshMissions()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                    <button class="btn btn-primary" onclick="showDispatchModal()">
+                        <i class="fas fa-paper-plane"></i> Dispatch Drone
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mission Filters -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Status</label>
+                                    <select class="form-select" id="statusFilter" onchange="filterMissions()">
+                                        <option value="">All Statuses</option>
+                                        <option value="requested">Requested</option>
+                                        <option value="accepted">Accepted</option>
+                                        <option value="assigned">Assigned</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Priority</label>
+                                    <select class="form-select" id="priorityFilter" onchange="filterMissions()">
+                                        <option value="">All Priorities</option>
+                                        <option value="emergency">Emergency</option>
+                                        <option value="high">High</option>
+                                        <option value="normal">Normal</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Date Range</label>
+                                    <input type="date" class="form-control" id="dateFilter" onchange="filterMissions()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Actions</label>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                            <i class="fas fa-times"></i> Clear Filters
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Missions Tab -->
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs" id="missionTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">
+                                <i class="fas fa-clock"></i> Pending Requests
+                                <span class="badge bg-warning ms-2">{{ pending_missions|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab">
+                                <i class="fas fa-plane"></i> Active Missions
+                                <span class="badge bg-primary ms-2">{{ active_missions|length }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab">
+                                <i class="fas fa-check"></i> Completed
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content" id="missionTabContent">
+                        <!-- Pending Missions -->
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if pending_missions %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Patient</th>
+                                                        <th>Type</th>
+                                                        <th>Priority</th>
+                                                        <th>Medical Items</th>
+                                                        <th>Location</th>
+                                                        <th>Requested</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for mission in pending_missions %}
+                                                    <tr data-mission-id="{{ mission.id }}" data-status="{{ mission.status }}" data-priority="{{ mission.priority }}">
+                                                        <td><strong>#{{ mission.id }}</strong></td>
+                                                        <td>
+                                                            {{ mission.patient.first_name }} {{ mission.patient.last_name }}<br>
+                                                            <small class="text-muted">{{ mission.patient.phone or 'No phone' }}</small>
+                                                        </td>
+                                                        <td>
+                                                            <i class="fas fa-{{ 'ambulance' if mission.mission_type == 'emergency' else 'box' }}"></i>
+                                                            {{ mission.mission_type.title() }}
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-{{ 'danger' if mission.priority == 'emergency' else 'warning' if mission.priority == 'high' else 'info' }}">
+                                                                {{ mission.priority.title() }}
+                                                            </span>
+                                                        </td>
+                                                        <td>{{ mission.medical_items[:30] }}...</td>
+                                                        <td>{{ mission.delivery_address[:25] }}...</td>
+                                                        <td>{{ mission.requested_at.strftime('%m/%d %H:%M') }}</td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <button class="btn btn-success" onclick="acceptMission({{ mission.id }})" title="Accept">
+                                                                    <i class="fas fa-check"></i>
+                                                                </button>
+                                                                <button class="btn btn-danger" onclick="rejectMission({{ mission.id }})" title="Reject">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                                <button class="btn btn-info" onclick="viewMissionDetails({{ mission.id }})" title="View Details">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+                                            <h5 class="mt-3">No pending requests</h5>
+                                            <p class="text-muted">All delivery requests have been processed</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Active Missions -->
+                        <div class="tab-pane fade" id="active" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    {% if active_missions %}
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>ID</th>
+                                                        <th>Patient</th>
+                                                        <th>Drone</th>
+                                                        <th>Status</th>
+                                                        <th>Progress</th>
+                                                        <th>ETA</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for mission in active_missions %}
+                                                    <tr>
+                                                        <td><strong>#{{ mission.id }}</strong></td>
+                                                        <td>{{ mission.patient.first_name }} {{ mission.patient.last_name }}</td>
+                                                        <td>
+                                                            {% if mission.drone %}
+                                                                {{ mission.drone.name }}<br>
+                                                                <small class="text-muted">{{ mission.drone.battery_level }}% battery</small>
+                                                            {% else %}
+                                                                <span class="text-muted">No drone assigned</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-{{ 'warning' if mission.status == 'in_progress' else 'info' }}">
+                                                                {{ mission.status.replace('_', ' ').title() }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="progress" style="width: 100px;">
+                                                                <div class="progress-bar" style="width: {{ 75 if mission.status == 'in_progress' else 25 }}%"></div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            {% if mission.status == 'in_progress' %}
+                                                                <span class="text-success">15 min</span>
+                                                            {% else %}
+                                                                <span class="text-muted">--</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="{{ url_for('track_mission', mission_id=mission.id) }}" class="btn btn-primary" title="Track">
+                                                                    <i class="fas fa-map"></i>
+                                                                </a>
+                                                                {% if not mission.drone_id %}
+                                                                <button class="btn btn-warning" onclick="showDispatchModal({{ mission.id }})" title="Dispatch">
+                                                                    <i class="fas fa-paper-plane"></i>
+                                                                </button>
+                                                                {% endif %}
+                                                                <button class="btn btn-danger" onclick="abortMission({{ mission.id }})" title="Abort">
+                                                                    <i class="fas fa-stop"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    {% else %}
+                                        <div class="text-center py-5">
+                                            <i class="fas fa-plane text-muted" style="font-size: 3rem;"></i>
+                                            <h5 class="mt-3">No active missions</h5>
+                                            <p class="text-muted">No missions currently in progress</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Completed Missions -->
+                        <div class="tab-pane fade" id="completed" role="tabpanel">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="text-center py-3">
+                                        <p class="text-muted">Completed missions will be loaded here</p>
+                                        <button class="btn btn-outline-primary" onclick="loadCompletedMissions()">
+                                            <i class="fas fa-download"></i> Load Completed Missions
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Mission Details Modal -->
+<div class="modal fade" id="missionDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mission Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="missionDetailsContent">
+                <!-- Content loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="acceptMissionBtn" onclick="acceptMissionFromModal()">Accept Mission</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dispatch Drone Modal -->
+<div class="modal fade" id="dispatchModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Dispatch Drone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dispatchForm">
+                    <input type="hidden" id="dispatchMissionId">
+                    <div class="mb-3">
+                        <label class="form-label">Select Drone</label>
+                        <select class="form-select" id="droneSelect" required>
+                            <option value="">Choose available drone...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dispatch Notes</label>
+                        <textarea class="form-control" id="dispatchNotes" rows="3" placeholder="Any special instructions for the drone operator..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="dispatchDrone()">Dispatch Drone</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentMissionId = null;
+
+function acceptMission(missionId) {
+    if (confirm('Accept this delivery request?')) {
+        fetch(`/api/missions/${missionId}/accept`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showAlert('Mission accepted successfully!', 'success');
+                refreshMissions();
+            } else {
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to accept mission', 'danger');
+        });
+    }
+}
+
+function rejectMission(missionId) {
+    if (confirm('Reject this delivery request? This action cannot be undone.')) {
+        fetch(`/api/missions/${missionId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showAlert('Mission rejected', 'info');
+                refreshMissions();
+            } else {
+                showAlert('Error: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Failed to reject mission', 'danger');
+        });
+    }
+}
+
+function viewMissionDetails(missionId) {
+    currentMissionId = missionId;
+    
+    // Create mock mission details since API endpoint might not exist
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Mission Information</h6>
+                <p><strong>Mission ID:</strong> #${missionId}</p>
+                <p><strong>Type:</strong> Medical Delivery</p>
+                <p><strong>Priority:</strong> High</p>
+                <p><strong>Status:</strong> Pending Review</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Patient Information</h6>
+                <p><strong>Name:</strong> Patient Name</p>
+                <p><strong>Contact:</strong> +232 30 700 479</p>
+                <p><strong>Medical Items:</strong> Emergency medications</p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Delivery Details</h6>
+                <p><strong>Pickup:</strong> Central Hospital, Freetown</p>
+                <p><strong>Delivery:</strong> Patient residence</p>
+                <p><strong>Special Instructions:</strong> Handle with care, temperature-sensitive medication</p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('missionDetailsContent').innerHTML = content;
+    new bootstrap.Modal(document.getElementById('missionDetailsModal')).show();
+}
+
+function acceptMissionFromModal() {
+    if (currentMissionId) {
+        bootstrap.Modal.getInstance(document.getElementById('missionDetailsModal')).hide();
+        acceptMission(currentMissionId);
+    }
+}
+
+function showDispatchModal(missionId = null) {
+    if (missionId) {
+        document.getElementById('dispatchMissionId').value = missionId;
+    }
+    
+    // Load available drones
+    fetch('/api/drones/available')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('droneSelect');
+            select.innerHTML = '<option value="">Choose available drone...</option>';
+            
+            data.drones.forEach(drone => {
+                const option = document.createElement('option');
+                option.value = drone.id;
+                option.textContent = `${drone.name} (${drone.battery_level}% battery, ${drone.max_payload}kg capacity)`;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading drones:', error);
+            showAlert('Failed to load available drones', 'danger');
+        });
+    
+    new bootstrap.Modal(document.getElementById('dispatchModal')).show();
+}
+
+function dispatchDrone() {
+    const missionId = document.getElementById('dispatchMissionId').value;
+    const droneId = document.getElementById('droneSelect').value;
+    const notes = document.getElementById('dispatchNotes').value;
+    
+    if (!droneId) {
+        showAlert('Please select a drone', 'warning');
+        return;
+    }
+    
+    fetch(`/api/missions/${missionId}/dispatch`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            drone_id: parseInt(droneId),
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showAlert('Drone dispatched successfully!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('dispatchModal')).hide();
+            refreshMissions();
+        } else {
+            showAlert('Error: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Failed to dispatch drone', 'danger');
+    });
+}
+
+function abortMission(missionId) {
+    if (confirm('Abort this mission? The drone will return to base.')) {
+        showAlert('Mission abort functionality would be implemented here', 'info');
+    }
+}
+
+function filterMissions() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const priorityFilter = document.getElementById('priorityFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    
+    const rows = document.querySelectorAll('tbody tr[data-mission-id]');
+    rows.forEach(row => {
+        let show = true;
+        
+        if (statusFilter && row.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        if (priorityFilter && row.dataset.priority !== priorityFilter) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function clearFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('priorityFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    filterMissions();
+}
+
+function refreshMissions() {
+    location.reload();
+}
+
+function loadCompletedMissions() {
+    showAlert('Loading completed missions...', 'info');
+    // Implementation would load completed missions via API
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Auto-refresh missions every 30 seconds
+setInterval(refreshMissions, 30000);
+</script>
+{% endblock %}

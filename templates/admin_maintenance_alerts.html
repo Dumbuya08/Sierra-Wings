@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Alerts - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <!-- Admin Sidebar -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user-shield"></i> Admin Panel</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="{{ url_for('user_management') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-users"></i> User Management
+                </a>
+                <a href="{{ url_for('drone_management') }}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-drone"></i> Drone Management
+                </a>
+                <a href="{{ url_for('maintenance_alerts') }}" class="list-group-item list-group-item-action active">
+                    <i class="fas fa-exclamation-triangle"></i> Maintenance Alerts
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="fas fa-exclamation-triangle"></i> Maintenance Alerts</h2>
+            <a href="{{ url_for('send_maintenance_alert') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Send Alert
+            </a>
+        </div>
+        
+        <!-- Quick Alert Templates -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-bolt"></i> Quick Alerts</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('quick_maintenance_alert') }}" class="d-inline">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <select name="template" class="form-select" required>
+                                <option value="">Select Quick Alert Template</option>
+                                <option value="system_update">System Update (2 hours)</option>
+                                <option value="database_maintenance">Database Maintenance (1 hour)</option>
+                                <option value="security_update">Security Enhancement (3 hours)</option>
+                                <option value="server_migration">Server Migration (4 hours)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-paper-plane"></i> Send Quick Alert
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Recent Alerts -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Maintenance Alerts</h5>
+            </div>
+            <div class="card-body">
+                {% if alerts %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for alert in alerts %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ alert.title }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ alert.message[:100] }}{% if alert.message|length > 100 %}...{% endif %}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'danger' if alert.alert_type == 'emergency' else 'success' if alert.alert_type == 'completed' else 'warning' }}">
+                                                {{ alert.alert_type|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if alert.start_time %}
+                                                {{ alert.start_time.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if alert.end_time %}
+                                                {{ alert.end_time.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ alert.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" 
+                                                    onclick="viewAlert({{ alert.id }}, '{{ alert.title }}', '{{ alert.message }}')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-bell-slash fa-3x text-muted"></i>
+                        <p class="mt-3 text-muted">No maintenance alerts sent yet.</p>
+                        <a href="{{ url_for('send_maintenance_alert') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Send First Alert
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alert Details Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalTitle">Alert Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="alertModalContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewAlert(alertId, title, message) {
+    document.getElementById('alertModalTitle').textContent = title;
+    document.getElementById('alertModalContent').innerHTML = `
+        <div class="alert alert-info">
+            <strong>Alert Message:</strong>
+            <p class="mt-2">${message}</p>
+        </div>
+    `;
+    
+    var modal = new bootstrap.Modal(document.getElementById('alertModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

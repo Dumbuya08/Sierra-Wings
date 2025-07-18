@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('user_management') }}">
+                            <i class="fas fa-users"></i> User Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('drone_management') }}">
+                            <i class="fas fa-drone"></i> Drone Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('live_tracking') }}">
+                            <i class="fas fa-map"></i> Live Tracking
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">User Management</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button class="btn btn-outline-secondary me-2" onclick="refreshUsers()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddUserModal()">
+                        <i class="fas fa-user-plus"></i> Add User
+                    </button>
+                </div>
+            </div>
+            
+            <!-- User Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-users text-primary" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ users|length }}</h5>
+                            <p class="card-text">Total Users</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-user text-info" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ users|selectattr('role', 'equalto', 'patient')|list|length }}</h5>
+                            <p class="card-text">Patients</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-hospital text-success" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ users|selectattr('role', 'equalto', 'clinic')|list|length }}</h5>
+                            <p class="card-text">Clinics</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-user-shield text-warning" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ users|selectattr('role', 'equalto', 'admin')|list|length }}</h5>
+                            <p class="card-text">Administrators</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Filters -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Role</label>
+                                    <select class="form-select" id="roleFilter" onchange="filterUsers()">
+                                        <option value="">All Roles</option>
+                                        <option value="patient">Patients</option>
+                                        <option value="clinic">Clinics</option>
+                                        <option value="admin">Administrators</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Status</label>
+                                    <select class="form-select" id="statusFilter" onchange="filterUsers()">
+                                        <option value="">All Statuses</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Search Users</label>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name, email, or username..." onkeyup="searchUsers()">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Actions</label>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Users Table -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users"></i> All Users
+                                <span class="badge bg-primary ms-2" id="userCount">{{ users|length }}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Joined</th>
+                                            <th>Last Active</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        {% for user in users %}
+                                        <tr data-user-id="{{ user.id }}" data-role="{{ user.role }}" data-status="{{ 'active' if user.is_active else 'inactive' }}">
+                                            <td><strong>#{{ user.id }}</strong></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-sm bg-{{ 'primary' if user.role == 'patient' else 'success' if user.role == 'clinic' else 'warning' }} rounded-circle d-flex align-items-center justify-content-center text-white me-2">
+                                                        <i class="fas fa-{{ 'user' if user.role == 'patient' else 'hospital' if user.role == 'clinic' else 'user-shield' }}"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ user.first_name }} {{ user.last_name }}</div>
+                                                        <small class="text-muted">@{{ user.username }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>{{ user.email }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if user.role == 'patient' else 'success' if user.role == 'clinic' else 'warning' }}">
+                                                    {{ user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if user.is_active else 'danger' }}">
+                                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                                            <td>
+                                                <span class="text-muted">{{ user.updated_at.strftime('%Y-%m-%d') }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="viewUserProfile({{ user.id }})" title="View Profile">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary" onclick="editUser({{ user.id }})" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    {% if user.id != current_user.id %}
+                                                    <button class="btn btn-outline-{{ 'danger' if user.is_active else 'success' }}" 
+                                                            onclick="toggleUserStatus({{ user.id }}, {{ user.is_active|tojson }})" 
+                                                            title="{{ 'Deactivate' if user.is_active else 'Activate' }}">
+                                                        <i class="fas fa-{{ 'ban' if user.is_active else 'check' }}"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="">Select role</option>
+                                    <option value="patient">Patient</option>
+                                    <option value="clinic">Healthcare Provider</option>
+                                    <option value="admin">Administrator</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" name="phone">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Temporary Password</label>
+                        <input type="password" class="form-control" name="password" required>
+                        <div class="form-text">User will be required to change password on first login</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <textarea class="form-control" name="address" rows="2"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="is_active" checked>
+                        <label class="form-check-label">Active Account</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createUser()">Create User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Profile Modal -->
+<div class="modal fade" id="userProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userProfileContent">
+                <!-- Content loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterUsers() {
+    const roleFilter = document.getElementById('roleFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        if (roleFilter && row.dataset.role !== roleFilter) {
+            show = false;
+        }
+        
+        if (statusFilter && row.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    document.getElementById('userCount').textContent = visibleCount;
+}
+
+function searchUsers() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const show = text.includes(searchTerm);
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    document.getElementById('userCount').textContent = visibleCount;
+}
+
+function clearFilters() {
+    document.getElementById('roleFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    
+    const rows = document.querySelectorAll('#usersTableBody tr');
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+    
+    document.getElementById('userCount').textContent = {{ users|length }};
+}
+
+function showAddUserModal() {
+    new bootstrap.Modal(document.getElementById('addUserModal')).show();
+}
+
+function createUser() {
+    const form = document.getElementById('addUserForm');
+    const formData = new FormData(form);
+    
+    // Convert form data to JSON
+    const userData = {};
+    formData.forEach((value, key) => {
+        if (key === 'is_active') {
+            userData[key] = form.querySelector(`[name="${key}"]`).checked;
+        } else {
+            userData[key] = value;
+        }
+    });
+    
+    // Simulate user creation
+    showAlert('User creation functionality would be implemented here', 'info');
+    bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+}
+
+function viewUserProfile(userId) {
+    // Load user profile data
+    const content = `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="avatar-lg bg-primary rounded-circle d-flex align-items-center justify-content-center text-white mx-auto mb-3">
+                    <i class="fas fa-user" style="font-size: 2rem;"></i>
+                </div>
+                <h5>User Profile</h5>
+                <p class="text-muted">User ID: #${userId}</p>
+            </div>
+            <div class="col-md-8">
+                <h6>Personal Information</h6>
+                <p><strong>Name:</strong> John Doe</p>
+                <p><strong>Email:</strong> john.doe@example.com</p>
+                <p><strong>Phone:</strong> +232 XX XXX XXXX</p>
+                <p><strong>Role:</strong> Patient</p>
+                <p><strong>Status:</strong> Active</p>
+                <p><strong>Joined:</strong> 2025-01-01</p>
+                
+                <h6 class="mt-4">Activity Summary</h6>
+                <p><strong>Total Missions:</strong> 15</p>
+                <p><strong>Completed Missions:</strong> 12</p>
+                <p><strong>Last Login:</strong> 2 hours ago</p>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('userProfileContent').innerHTML = content;
+    new bootstrap.Modal(document.getElementById('userProfileModal')).show();
+}
+
+function editUser(userId) {
+    showAlert('User editing functionality would be implemented here', 'info');
+}
+
+function toggleUserStatus(userId, currentStatus) {
+    const action = currentStatus ? 'deactivate' : 'activate';
+    if (confirm(`Are you sure you want to ${action} this user?`)) {
+        showAlert(`User ${action}d successfully`, 'success');
+        // Implement API call to toggle user status
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    }
+}
+
+function refreshUsers() {
+    location.reload();
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+<style>
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+
+{% block title %}Account Deletion Management - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-times me-2"></i>
+                        Account Deletion Requests Management
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h3 id="pendingCount">{{ pending_requests|length }}</h3>
+                                    <p class="mb-0">Pending Requests</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h3 id="approvedCount">{{ approved_requests|length }}</h3>
+                                    <p class="mb-0">Approved</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-secondary text-white">
+                                <div class="card-body text-center">
+                                    <h3 id="rejectedCount">{{ rejected_requests|length }}</h3>
+                                    <p class="mb-0">Rejected</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#pending" role="tab">
+                                Pending Requests ({{ pending_requests|length }})
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#approved" role="tab">
+                                Approved ({{ approved_requests|length }})
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#rejected" role="tab">
+                                Rejected ({{ rejected_requests|length }})
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content mt-3">
+                        <!-- Pending Requests Tab -->
+                        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Reason</th>
+                                            <th>Request Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in pending_requests %}
+                                        <tr>
+                                            <td>{{ request.user.username }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if request.user.role == 'patient' else 'info' if request.user.role == 'clinic' else 'success' }}">
+                                                    {{ request.user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ request.user.email }}</td>
+                                            <td>{{ request.reason }}</td>
+                                            <td>{{ request.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-success me-2" onclick="approveRequest({{ request.id }})">
+                                                    <i class="fas fa-check"></i> Approve
+                                                </button>
+                                                <button class="btn btn-sm btn-danger" onclick="rejectRequest({{ request.id }})">
+                                                    <i class="fas fa-times"></i> Reject
+                                                </button>
+                                                <button class="btn btn-sm btn-info" onclick="viewRequestDetails({{ request.id }})">
+                                                    <i class="fas fa-eye"></i> Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Approved Requests Tab -->
+                        <div class="tab-pane fade" id="approved" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Reason</th>
+                                            <th>Request Date</th>
+                                            <th>Approved Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in approved_requests %}
+                                        <tr>
+                                            <td>{{ request.user.username }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if request.user.role == 'patient' else 'info' if request.user.role == 'clinic' else 'success' }}">
+                                                    {{ request.user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ request.user.email }}</td>
+                                            <td>{{ request.reason }}</td>
+                                            <td>{{ request.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ request.processed_at.strftime('%Y-%m-%d %H:%M') if request.processed_at else 'N/A' }}</td>
+                                            <td>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Approved
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Rejected Requests Tab -->
+                        <div class="tab-pane fade" id="rejected" role="tabpanel">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Role</th>
+                                            <th>Email</th>
+                                            <th>Reason</th>
+                                            <th>Request Date</th>
+                                            <th>Rejected Date</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for request in rejected_requests %}
+                                        <tr>
+                                            <td>{{ request.user.username }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ 'primary' if request.user.role == 'patient' else 'info' if request.user.role == 'clinic' else 'success' }}">
+                                                    {{ request.user.role.title() }}
+                                                </span>
+                                            </td>
+                                            <td>{{ request.user.email }}</td>
+                                            <td>{{ request.reason }}</td>
+                                            <td>{{ request.requested_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                            <td>{{ request.processed_at.strftime('%Y-%m-%d %H:%M') if request.processed_at else 'N/A' }}</td>
+                                            <td>
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> Rejected
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Details Modal -->
+<div class="modal fade" id="requestDetailsModal" tabindex="-1" aria-labelledby="requestDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestDetailsModalLabel">Account Deletion Request Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="requestDetailsBody">
+                <!-- Details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Confirm Action</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="confirmationBody">
+                <!-- Confirmation message will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmAction">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function approveRequest(requestId) {
+    document.getElementById('confirmationBody').innerHTML = `
+        <p>Are you sure you want to approve this account deletion request?</p>
+        <p class="text-warning"><strong>Warning:</strong> This action will permanently delete the user's account and all associated data.</p>
+    `;
+    document.getElementById('confirmationModalLabel').textContent = 'Approve Account Deletion';
+    document.getElementById('confirmAction').onclick = function() {
+        processRequest(requestId, 'approved');
+    };
+    new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+}
+
+function rejectRequest(requestId) {
+    document.getElementById('confirmationBody').innerHTML = `
+        <p>Are you sure you want to reject this account deletion request?</p>
+        <p class="text-info">The user will be notified that their request has been rejected.</p>
+    `;
+    document.getElementById('confirmationModalLabel').textContent = 'Reject Account Deletion';
+    document.getElementById('confirmAction').onclick = function() {
+        processRequest(requestId, 'rejected');
+    };
+    new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+}
+
+function processRequest(requestId, status) {
+    fetch(`/admin/account-deletion/${requestId}/process`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('success', `Account deletion request ${status} successfully.`);
+            location.reload();
+        } else {
+            showNotification('error', `Error: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('error', 'An error occurred while processing the request.');
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('confirmationModal')).hide();
+}
+
+function viewRequestDetails(requestId) {
+    fetch(`/admin/account-deletion/${requestId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const request = data.request;
+                document.getElementById('requestDetailsBody').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>User Information</h6>
+                            <p><strong>Username:</strong> ${request.user.username}</p>
+                            <p><strong>Email:</strong> ${request.user.email}</p>
+                            <p><strong>Role:</strong> ${request.user.role}</p>
+                            <p><strong>Account Created:</strong> ${request.user.created_at}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Request Details</h6>
+                            <p><strong>Reason:</strong> ${request.reason}</p>
+                            <p><strong>Request Date:</strong> ${request.requested_at}</p>
+                            <p><strong>Status:</strong> ${request.status}</p>
+                            ${request.feedback ? `<p><strong>Feedback:</strong> ${request.feedback}</p>` : ''}
+                        </div>
+                    </div>
+                    ${request.additional_info ? `
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Additional Information</h6>
+                            <p>${request.additional_info}</p>
+                        </div>
+                    </div>
+                    ` : ''}
+                `;
+                new bootstrap.Modal(document.getElementById('requestDetailsModal')).show();
+            } else {
+                showNotification('error', `Error: ${data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('error', 'An error occurred while fetching request details.');
+        });
+}
+
+function showNotification(type, message) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const notification = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    const existingAlert = document.querySelector('.alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    document.querySelector('.container-fluid').insertAdjacentHTML('afterbegin', notification);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.querySelector('.alert');
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

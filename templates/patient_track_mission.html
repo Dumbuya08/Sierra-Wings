@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Track Mission - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('search_hospitals') }}">
+                            <i class="fas fa-hospital me-2"></i>Search Hospitals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">Track Mission #{{ mission.id }}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('get_missions') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Back to History
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mission Status -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Mission Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Current Status:</strong>
+                                        <span class="badge bg-{% if mission.status == 'completed' %}success{% elif mission.status == 'cancelled' %}danger{% elif mission.status == 'in_progress' %}warning{% else %}info{% endif %} ms-2">
+                                            {{ mission.status.replace('_', ' ').title() }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Priority:</strong>
+                                        <span class="badge bg-{% if mission.priority == 'emergency' %}danger{% elif mission.priority == 'urgent' %}warning{% else %}info{% endif %} ms-2">
+                                            {{ mission.priority.title() }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <strong>Requested:</strong>
+                                        <p class="mb-0">{{ mission.created_at.strftime('%Y-%m-%d %H:%M') if mission.created_at else 'N/A' }}</p>
+                                    </div>
+                                    {% if mission.estimated_completion %}
+                                    <div class="mb-3">
+                                        <strong>Estimated Completion:</strong>
+                                        <p class="mb-0">{{ mission.estimated_completion.strftime('%Y-%m-%d %H:%M') }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Progress</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="progress-timeline">
+                                <div class="timeline-item {% if mission.status in ['requested', 'accepted', 'assigned', 'in_progress', 'completed'] %}active{% endif %}">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Requested</span>
+                                </div>
+                                <div class="timeline-item {% if mission.status in ['accepted', 'assigned', 'in_progress', 'completed'] %}active{% endif %}">
+                                    <i class="fas fa-check"></i>
+                                    <span>Accepted</span>
+                                </div>
+                                <div class="timeline-item {% if mission.status in ['assigned', 'in_progress', 'completed'] %}active{% endif %}">
+                                    <i class="fas fa-drone"></i>
+                                    <span>Assigned</span>
+                                </div>
+                                <div class="timeline-item {% if mission.status in ['in_progress', 'completed'] %}active{% endif %}">
+                                    <i class="fas fa-plane"></i>
+                                    <span>In Flight</span>
+                                </div>
+                                <div class="timeline-item {% if mission.status == 'completed' %}active{% endif %}">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Delivered</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission Details -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Mission Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Medical Items:</strong>
+                                <p class="text-muted">{{ mission.medical_items }}</p>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Delivery Address:</strong>
+                                <p class="text-muted">{{ mission.delivery_address }}</p>
+                            </div>
+                            {% if mission.special_instructions %}
+                            <div class="mb-3">
+                                <strong>Special Instructions:</strong>
+                                <p class="text-muted">{{ mission.special_instructions }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Live Tracking</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="trackingMap" style="height: 300px; background-color: #f8f9fa;" class="d-flex align-items-center justify-content-center">
+                                <div class="text-center">
+                                    <i class="fas fa-map-marker-alt fa-3x text-muted mb-2"></i>
+                                    <p class="text-muted">Live tracking map will appear here</p>
+                                    {% if mission.status == 'in_progress' %}
+                                    <button class="btn btn-primary" onclick="startLiveTracking()">
+                                        <i class="fas fa-play me-2"></i>Start Live Tracking
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drone Information -->
+            {% if mission.assigned_drone_id %}
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Assigned Drone</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Drone ID:</strong>
+                                    <p class="text-muted">{{ mission.assigned_drone_id }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Battery Level:</strong>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 85%"></div>
+                                    </div>
+                                    <small class="text-muted">85%</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Speed:</strong>
+                                    <p class="text-muted">25 km/h</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>ETA:</strong>
+                                    <p class="text-muted">15 minutes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<style>
+.progress-timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.timeline-item.active {
+    opacity: 1;
+    color: #007bff;
+}
+
+.timeline-item i {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+    font-size: 14px;
+}
+
+.timeline-item.active i {
+    background-color: #007bff;
+    color: white;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: 14px;
+    width: 2px;
+    height: 20px;
+    background-color: #e9ecef;
+    margin-top: 30px;
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-item.active::before {
+    background-color: #007bff;
+}
+</style>
+
+<script>
+function startLiveTracking() {
+    alert('Live tracking will be implemented with real-time drone coordinates');
+}
+</script>
+{% endblock %}

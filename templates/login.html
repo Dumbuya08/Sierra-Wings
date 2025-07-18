@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Login - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold">Sign In</h2>
+                        <p class="text-muted">Access your account</p>
+                    </div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Enter your username">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3" id="invite_code_field" style="display: none;">
+                            <label for="invite_code" class="form-label">Access Code</label>
+                            <input type="text" class="form-control" id="invite_code" name="invite_code" placeholder="Enter access code">
+                            <small class="form-text text-muted">Required for admin and clinic accounts</small>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Remember me</label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+                    </form>
+                    
+                    <script>
+                        // Show invite code field based on username lookup
+                        document.getElementById('username').addEventListener('blur', function() {
+                            const username = this.value.trim();
+                            if (username) {
+                                fetch('/check-user-role', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({username: username})
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    const inviteCodeField = document.getElementById('invite_code_field');
+                                    if (data.role === 'admin' || data.role === 'clinic') {
+                                        inviteCodeField.style.display = 'block';
+                                        document.getElementById('invite_code').required = true;
+                                    } else {
+                                        inviteCodeField.style.display = 'none';
+                                        document.getElementById('invite_code').required = false;
+                                    }
+                                })
+                                .catch(error => {
+                                    console.log('User check failed:', error);
+                                    document.getElementById('invite_code_field').style.display = 'none';
+                                });
+                            }
+                        });
+                    </script>
+                    
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account? <a href="{{ url_for('auth.register') }}" class="text-decoration-none">Sign up here</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Production Note -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">Getting Started</h6>
+                    <small class="text-muted">
+                        This is a production-ready application. Create your account or contact an administrator for access.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

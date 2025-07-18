@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Drone Management - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Drone Management</h1>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Drone Fleet Status -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-drone fa-2x mb-2"></i>
+                            <h4 id="available-drones">{{ drones | selectattr('status', 'equalto', 'available') | list | length }}</h4>
+                            <p>Available Drones</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-plane-departure fa-2x mb-2"></i>
+                            <h4 id="active-drones">{{ drones | selectattr('status', 'equalto', 'in_flight') | list | length }}</h4>
+                            <p>In Flight</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-wifi fa-2x mb-2"></i>
+                            <h4 id="connected-drones">{{ drones | selectattr('wireless_status', 'in', ['connected_wifi', 'connected_cellular']) | list | length }}</h4>
+                            <p>Connected</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body text-center">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <h4 id="maintenance-drones">{{ drones | selectattr('status', 'equalto', 'maintenance') | list | length }}</h4>
+                            <p>Maintenance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drone Control Panel -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Drone Control Panel</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <button class="btn btn-primary w-100 mb-2" onclick="refreshDroneStatus()">
+                                <i class="fas fa-sync me-2"></i>Refresh Status
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-success w-100 mb-2" onclick="connectAllDrones()">
+                                <i class="fas fa-wifi me-2"></i>Connect All
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-warning w-100 mb-2" onclick="emergencyLandAll()">
+                                <i class="fas fa-plane-arrival me-2"></i>Emergency Land All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drone List -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Fleet Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Drone Name</th>
+                                    <th>Model</th>
+                                    <th>Status</th>
+                                    <th>Wireless Connection</th>
+                                    <th>Battery</th>
+                                    <th>Location</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="drone-table-body">
+                                {% for drone in drones %}
+                                <tr data-drone-id="{{ drone.id }}">
+                                    <td>
+                                        <strong>{{ drone.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">ID: {{ drone.id }}</small>
+                                    </td>
+                                    <td>{{ drone.model }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ 'success' if drone.status == 'available' else 'warning' if drone.status == 'in_flight' else 'danger' }}">
+                                            {{ drone.status.replace('_', ' ').title() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="wireless-status">
+                                            <span class="badge bg-{{ 'success' if drone.wireless_status in ['connected_wifi', 'connected_cellular'] else 'secondary' }}">
+                                                {{ drone.wireless_status.replace('_', ' ').title() if drone.wireless_status else 'Disconnected' }}
+                                            </span>
+                                            {% if drone.wireless_status in ['connected_wifi', 'connected_cellular'] %}
+                                                <div class="signal-strength">
+                                                    <small>{{ drone.connection_strength or 0 }}%</small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="battery-indicator">
+                                            <div class="battery-bar">
+                                                <div class="battery-fill" style="width: {{ drone.battery_level or 0 }}%"></div>
+                                            </div>
+                                            <small>{{ drone.battery_level or 0 }}%</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small>
+                                            {{ "%.4f, %.4f"|format(drone.current_latitude or 0, drone.current_longitude or 0) }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-vertical btn-group-sm">
+                                            {% if drone.wireless_status in ['connected_wifi', 'connected_cellular'] %}
+                                                <button class="btn btn-outline-danger btn-sm" onclick="disconnectDrone({{ drone.id }})">
+                                                    <i class="fas fa-wifi-slash"></i>
+                                                </button>
+                                            {% else %}
+                                                <button class="btn btn-outline-success btn-sm" onclick="connectDrone({{ drone.id }})">
+                                                    <i class="fas fa-wifi"></i>
+                                                </button>
+                                            {% endif %}
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewDroneDetails({{ drone.id }})">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.battery-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.battery-bar {
+    width: 30px;
+    height: 12px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.battery-fill {
+    height: 100%;
+    background-color: #28a745;
+    transition: width 0.3s ease;
+}
+
+.signal-strength {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.wireless-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 2px;
+}
+</style>
+
+<script>
+function refreshDroneStatus() {
+    fetch('/api/admin/drones/status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.drones) {
+                updateDroneTable(data.drones);
+                updateDroneStats(data.summary);
+            }
+        })
+        .catch(error => {
+            console.error('Error refreshing drone status:', error);
+            alert('Error refreshing drone status');
+        });
+}
+
+function connectDrone(droneId) {
+    fetch('/api/drones/connect', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            drone_id: droneId,
+            connection_type: 'wifi'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            refreshDroneStatus();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error connecting drone:', error);
+        alert('Error connecting drone');
+    });
+}
+
+function disconnectDrone(droneId) {
+    fetch('/api/drones/disconnect', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            drone_id: droneId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            refreshDroneStatus();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error disconnecting drone:', error);
+        alert('Error disconnecting drone');
+    });
+}
+
+function connectAllDrones() {
+    if (confirm('Connect all available drones?')) {
+        // Implementation for connecting all drones
+        alert('Connecting all drones...');
+    }
+}
+
+function emergencyLandAll() {
+    if (confirm('Are you sure you want to emergency land all drones? This action cannot be undone.')) {
+        // Implementation for emergency landing all drones
+        alert('Emergency landing initiated for all drones');
+    }
+}
+
+function viewDroneDetails(droneId) {
+    // Implementation for viewing drone details
+    alert('Viewing details for drone ID: ' + droneId);
+}
+
+function updateDroneTable(drones) {
+    const tbody = document.getElementById('drone-table-body');
+    // Update table with new drone data
+    console.log('Updating drone table with:', drones);
+}
+
+function updateDroneStats(summary) {
+    document.getElementById('available-drones').textContent = summary.available;
+    document.getElementById('active-drones').textContent = summary.in_flight;
+    document.getElementById('connected-drones').textContent = summary.connected;
+    document.getElementById('maintenance-drones').textContent = summary.total - summary.available - summary.in_flight;
+}
+
+// Auto-refresh every 30 seconds
+setInterval(refreshDroneStatus, 30000);
+</script>
+{% endblock %}

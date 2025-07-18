@@ -1,0 +1,385 @@
+<!-- Minimized Widgets System -->
+<div class="widget-container">
+    <!-- Weather Widget -->
+    <div class="widget-card" data-widget="weather">
+        <div class="widget-header" onclick="toggleWidget('weather')">
+            <span class="widget-title">
+                <i class="fas fa-cloud-sun me-2"></i>Weather Conditions
+            </span>
+            <span class="widget-toggle" id="weather-toggle">
+                <i class="fas fa-plus"></i>
+            </span>
+        </div>
+        <div class="widget-content" id="weather-content" style="display: none;">
+            <div id="weather-info">
+                <div class="text-center">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <small class="d-block mt-1">Loading weather...</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery Status Widget -->
+    <div class="widget-card" data-widget="deliveries">
+        <div class="widget-header" onclick="toggleWidget('deliveries')">
+            <span class="widget-title">
+                <i class="fas fa-shipping-fast me-2"></i>Active Deliveries
+            </span>
+            <span class="widget-toggle" id="deliveries-toggle">
+                <i class="fas fa-plus"></i>
+            </span>
+        </div>
+        <div class="widget-content" id="deliveries-content" style="display: none;">
+            <div id="deliveries-info">
+                <div class="delivery-summary">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ active_missions or 0 }}</span>
+                                <span class="stat-label">Active</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-item">
+                                <span class="stat-number">{{ completed_missions or 0 }}</span>
+                                <span class="stat-label">Completed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Alerts Widget -->
+    <div class="widget-card" data-widget="alerts">
+        <div class="widget-header" onclick="toggleWidget('alerts')">
+            <span class="widget-title">
+                <i class="fas fa-bell me-2"></i>System Alerts
+            </span>
+            <span class="widget-toggle" id="alerts-toggle">
+                <i class="fas fa-plus"></i>
+            </span>
+        </div>
+        <div class="widget-content" id="alerts-content" style="display: none;">
+            <div id="alerts-info">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No system alerts at this time
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drone Status Widget -->
+    <div class="widget-card" data-widget="drones">
+        <div class="widget-header" onclick="toggleWidget('drones')">
+            <span class="widget-title">
+                <i class="fas fa-drone me-2"></i>Drone Status
+            </span>
+            <span class="widget-toggle" id="drones-toggle">
+                <i class="fas fa-plus"></i>
+            </span>
+        </div>
+        <div class="widget-content" id="drones-content" style="display: none;">
+            <div id="drones-info">
+                <div class="drone-grid">
+                    <div class="drone-item">
+                        <div class="drone-icon">
+                            <i class="fas fa-drone"></i>
+                        </div>
+                        <div class="drone-details">
+                            <h6>SW-001</h6>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                    <div class="drone-item">
+                        <div class="drone-icon">
+                            <i class="fas fa-drone"></i>
+                        </div>
+                        <div class="drone-details">
+                            <h6>SW-002</h6>
+                            <span class="badge bg-warning">Standby</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleWidget(widgetName) {
+    const content = document.getElementById(widgetName + '-content');
+    const toggle = document.getElementById(widgetName + '-toggle');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        toggle.innerHTML = '<i class="fas fa-minus"></i>';
+        
+        // Load widget data when expanded
+        if (widgetName === 'weather') {
+            loadRealTimeWeather();
+        } else if (widgetName === 'deliveries') {
+            loadDeliveryStatus();
+        } else if (widgetName === 'alerts') {
+            loadSystemAlerts();
+        } else if (widgetName === 'drones') {
+            loadDroneStatus();
+        }
+    } else {
+        content.style.display = 'none';
+        toggle.innerHTML = '<i class="fas fa-plus"></i>';
+    }
+}
+
+function loadDeliveryStatus() {
+    fetch('/api/delivery-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const deliveriesInfo = document.getElementById('deliveries-info');
+                deliveriesInfo.innerHTML = `
+                    <div class="delivery-summary">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <span class="stat-number">${data.active || 0}</span>
+                                    <span class="stat-label">Active</span>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-item">
+                                    <span class="stat-number">${data.completed || 0}</span>
+                                    <span class="stat-label">Completed</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="recent-deliveries mt-3">
+                            <h6>Recent Deliveries</h6>
+                            ${data.recent ? data.recent.map(delivery => `
+                                <div class="delivery-item">
+                                    <span class="delivery-id">#${delivery.id}</span>
+                                    <span class="badge bg-${delivery.status === 'completed' ? 'success' : 'warning'}">${delivery.status}</span>
+                                </div>
+                            `).join('') : '<p class="text-muted">No recent deliveries</p>'}
+                        </div>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading delivery status:', error);
+        });
+}
+
+function loadSystemAlerts() {
+    fetch('/api/system-alerts')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.alerts.length > 0) {
+                const alertsInfo = document.getElementById('alerts-info');
+                alertsInfo.innerHTML = data.alerts.map(alert => `
+                    <div class="alert alert-${alert.type}">
+                        <i class="fas fa-${alert.icon} me-2"></i>
+                        ${alert.message}
+                    </div>
+                `).join('');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading system alerts:', error);
+        });
+}
+
+function loadDroneStatus() {
+    fetch('/api/drone-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const dronesInfo = document.getElementById('drones-info');
+                dronesInfo.innerHTML = `
+                    <div class="drone-grid">
+                        ${data.drones ? data.drones.map(drone => `
+                            <div class="drone-item">
+                                <div class="drone-icon">
+                                    <i class="fas fa-drone"></i>
+                                </div>
+                                <div class="drone-details">
+                                    <h6>${drone.id}</h6>
+                                    <span class="badge bg-${drone.status === 'active' ? 'success' : 'warning'}">${drone.status}</span>
+                                </div>
+                            </div>
+                        `).join('') : '<p class="text-muted">No drones available</p>'}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading drone status:', error);
+        });
+}
+
+// Auto-refresh widgets every 30 seconds
+setInterval(function() {
+    // Only refresh expanded widgets
+    if (document.getElementById('weather-content').style.display === 'block') {
+        loadRealTimeWeather();
+    }
+    if (document.getElementById('deliveries-content').style.display === 'block') {
+        loadDeliveryStatus();
+    }
+    if (document.getElementById('alerts-content').style.display === 'block') {
+        loadSystemAlerts();
+    }
+    if (document.getElementById('drones-content').style.display === 'block') {
+        loadDroneStatus();
+    }
+}, 30000);
+</script>
+
+<style>
+.widget-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.widget-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.widget-card:hover {
+    transform: translateY(-2px);
+}
+
+.widget-header {
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.3s ease;
+}
+
+.widget-header:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
+.widget-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.widget-toggle {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.widget-content {
+    padding: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.stat-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #3498db;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+}
+
+.delivery-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.delivery-item:last-child {
+    border-bottom: none;
+}
+
+.drone-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.drone-item {
+    text-align: center;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    transition: border-color 0.2s ease;
+}
+
+.drone-item:hover {
+    border-color: #3498db;
+}
+
+.drone-icon {
+    font-size: 1.5rem;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+}
+
+.drone-details h6 {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .widget-container {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .widget-card {
+        margin-bottom: 1rem;
+    }
+    
+    .widget-header {
+        padding: 0.75rem;
+    }
+    
+    .widget-content {
+        padding: 0.75rem;
+    }
+    
+    .drone-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+}
+</style>

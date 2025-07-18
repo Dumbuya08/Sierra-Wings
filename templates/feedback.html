@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comment"></i> Send Feedback
+                    </h4>
+                    <p class="mb-0 text-muted">Help us improve the SierraWings medical delivery service</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="feedbackForm">
+                        <!-- Feedback Category -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Feedback Category</label>
+                            <select class="form-select" id="category" name="category" required>
+                                <option value="">Select category</option>
+                                <option value="general">General Feedback</option>
+                                <option value="bug_report">Bug Report</option>
+                                <option value="feature_request">Feature Request</option>
+                                <option value="service_quality">Service Quality</option>
+                                <option value="emergency_response">Emergency Response</option>
+                                <option value="technical_issue">Technical Issue</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Subject -->
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" 
+                                   placeholder="Brief description of your feedback" required>
+                        </div>
+                        
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <label class="form-label">Overall Rating</label>
+                            <div class="rating-container">
+                                <div class="star-rating">
+                                    <input type="radio" id="star5" name="rating" value="5">
+                                    <label for="star5" class="star">★</label>
+                                    <input type="radio" id="star4" name="rating" value="4">
+                                    <label for="star4" class="star">★</label>
+                                    <input type="radio" id="star3" name="rating" value="3">
+                                    <label for="star3" class="star">★</label>
+                                    <input type="radio" id="star2" name="rating" value="2">
+                                    <label for="star2" class="star">★</label>
+                                    <input type="radio" id="star1" name="rating" value="1">
+                                    <label for="star1" class="star">★</label>
+                                </div>
+                                <div class="rating-labels">
+                                    <span class="rating-label" id="ratingLabel">Please rate your experience</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Message -->
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Detailed Feedback</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" 
+                                      placeholder="Please provide detailed feedback about your experience with SierraWings..." required></textarea>
+                            <div class="form-text">
+                                <span id="charCount">0</span>/1000 characters
+                            </div>
+                        </div>
+                        
+                        <!-- User Information -->
+                        <div class="mb-3">
+                            <label class="form-label">Contact Information</label>
+                            <div class="alert alert-info">
+                                <strong>Name:</strong> {{ current_user.first_name }} {{ current_user.last_name }}<br>
+                                <strong>Email:</strong> {{ current_user.email }}<br>
+                                <strong>Role:</strong> {{ current_user.role.title() }}
+                                <br><small class="text-muted">We may contact you for follow-up questions</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Priority for Bug Reports -->
+                        <div class="mb-3" id="prioritySection" style="display: none;">
+                            <label for="priority" class="form-label">Priority Level</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="low">Low - Minor issue</option>
+                                <option value="medium">Medium - Affects functionality</option>
+                                <option value="high">High - Major issue</option>
+                                <option value="critical">Critical - System unusable</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Technical Details for Bug Reports -->
+                        <div class="mb-3" id="technicalSection" style="display: none;">
+                            <label for="technicalDetails" class="form-label">Technical Details</label>
+                            <textarea class="form-control" id="technicalDetails" name="technical_details" rows="3" 
+                                      placeholder="Browser, device, steps to reproduce, error messages, etc."></textarea>
+                        </div>
+                        
+                        <!-- Anonymous Feedback Option -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="anonymous" name="anonymous">
+                                <label class="form-check-label" for="anonymous">
+                                    Submit anonymously (we won't be able to follow up)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Newsletter Subscription -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="newsletter" name="newsletter">
+                                <label class="form-check-label" for="newsletter">
+                                    Subscribe to SierraWings updates and service announcements
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Send Feedback
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Feedback Guidelines -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Feedback Guidelines
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>What makes good feedback?</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Specific details about your experience</li>
+                                <li><i class="fas fa-check text-success"></i> Steps to reproduce issues</li>
+                                <li><i class="fas fa-check text-success"></i> Suggestions for improvement</li>
+                                <li><i class="fas fa-check text-success"></i> Constructive and respectful tone</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Emergency Issues</h6>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>For urgent medical emergencies,</strong> do not use this form. 
+                                Call our emergency hotline: <strong>+232 30 700 479</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Updates -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bullhorn"></i> Recent Updates
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-date">Jan 8, 2025</div>
+                            <div class="timeline-content">
+                                <strong>Flight Path Optimization</strong><br>
+                                <small class="text-muted">Improved route planning reduces delivery times by 15%</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Jan 5, 2025</div>
+                            <div class="timeline-content">
+                                <strong>Enhanced Battery Monitoring</strong><br>
+                                <small class="text-muted">Real-time battery alerts for better safety protocols</small>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-date">Jan 1, 2025</div>
+                            <div class="timeline-content">
+                                <strong>New Year Service Launch</strong><br>
+                                <small class="text-muted">24/7 emergency medical delivery now available</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Character counter for message field
+document.getElementById('message').addEventListener('input', function() {
+    const charCount = this.value.length;
+    const counter = document.getElementById('charCount');
+    counter.textContent = charCount;
+    
+    if (charCount > 1000) {
+        counter.parentElement.classList.add('text-danger');
+        this.classList.add('is-invalid');
+    } else {
+        counter.parentElement.classList.remove('text-danger');
+        this.classList.remove('is-invalid');
+    }
+});
+
+// Star rating functionality
+document.querySelectorAll('input[name="rating"]').forEach(input => {
+    input.addEventListener('change', function() {
+        const rating = parseInt(this.value);
+        const label = document.getElementById('ratingLabel');
+        const labels = {
+            1: 'Poor - Needs significant improvement',
+            2: 'Fair - Below expectations',
+            3: 'Good - Meets expectations',
+            4: 'Very Good - Exceeds expectations',
+            5: 'Excellent - Outstanding service'
+        };
+        label.textContent = labels[rating];
+        label.className = `rating-label text-${rating <= 2 ? 'danger' : rating === 3 ? 'warning' : 'success'}`;
+    });
+});
+
+// Category-specific fields
+document.getElementById('category').addEventListener('change', function() {
+    const category = this.value;
+    const prioritySection = document.getElementById('prioritySection');
+    const technicalSection = document.getElementById('technicalSection');
+    
+    if (category === 'bug_report' || category === 'technical_issue') {
+        prioritySection.style.display = 'block';
+        technicalSection.style.display = 'block';
+    } else {
+        prioritySection.style.display = 'none';
+        technicalSection.style.display = 'none';
+    }
+});
+
+// Form validation and submission
+document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Validate form
+    const requiredFields = ['category', 'subject', 'message'];
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        const element = document.getElementById(field);
+        if (!element.value.trim()) {
+            element.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            element.classList.remove('is-invalid');
+        }
+    });
+    
+    // Check if rating is selected
+    const ratingSelected = document.querySelector('input[name="rating"]:checked');
+    if (!ratingSelected) {
+        showAlert('Please select a rating', 'warning');
+        isValid = false;
+    }
+    
+    // Check message length
+    const message = document.getElementById('message').value;
+    if (message.length > 1000) {
+        showAlert('Message is too long. Please limit to 1000 characters.', 'warning');
+        isValid = false;
+    }
+    
+    if (isValid) {
+        // Show loading state
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+        
+        // Simulate form submission
+        setTimeout(() => {
+            showAlert('Thank you for your feedback! We\'ll review it and respond if necessary.', 'success');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            
+            // Reset form
+            this.reset();
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('ratingLabel').textContent = 'Please rate your experience';
+            document.getElementById('ratingLabel').className = 'rating-label';
+            document.getElementById('prioritySection').style.display = 'none';
+            document.getElementById('technicalSection').style.display = 'none';
+        }, 2000);
+    }
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 8000);
+}
+
+// Auto-save draft functionality
+let draftTimeout;
+document.querySelectorAll('#feedbackForm input, #feedbackForm textarea, #feedbackForm select').forEach(element => {
+    element.addEventListener('input', function() {
+        clearTimeout(draftTimeout);
+        draftTimeout = setTimeout(() => {
+            // Save draft to localStorage
+            const formData = new FormData(document.getElementById('feedbackForm'));
+            const draft = {};
+            for (let [key, value] of formData.entries()) {
+                draft[key] = value;
+            }
+            localStorage.setItem('feedbackDraft', JSON.stringify(draft));
+        }, 1000);
+    });
+});
+
+// Load draft on page load
+window.addEventListener('load', function() {
+    const draft = localStorage.getItem('feedbackDraft');
+    if (draft) {
+        const draftData = JSON.parse(draft);
+        Object.keys(draftData).forEach(key => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+                if (element.type === 'radio') {
+                    const radio = document.querySelector(`[name="${key}"][value="${draftData[key]}"]`);
+                    if (radio) radio.checked = true;
+                } else if (element.type === 'checkbox') {
+                    element.checked = draftData[key] === 'on';
+                } else {
+                    element.value = draftData[key];
+                }
+            }
+        });
+        
+        // Update character count if message was loaded
+        const messageField = document.getElementById('message');
+        if (messageField.value) {
+            document.getElementById('charCount').textContent = messageField.value.length;
+        }
+        
+        // Update category-specific fields
+        document.getElementById('category').dispatchEvent(new Event('change'));
+        
+        // Update rating label
+        const ratingInput = document.querySelector('input[name="rating"]:checked');
+        if (ratingInput) {
+            ratingInput.dispatchEvent(new Event('change'));
+        }
+    }
+});
+</script>
+
+<style>
+.star-rating {
+    direction: rtl;
+    display: inline-block;
+}
+
+.star-rating input[type="radio"] {
+    display: none;
+}
+
+.star-rating label {
+    color: #ddd;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+    color: #ffc107;
+}
+
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.rating-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-left: 2px solid #dee2e6;
+    padding-left: 1rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 0;
+    width: 8px;
+    height: 8px;
+    background: #007bff;
+    border-radius: 50%;
+}
+
+.timeline-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-content {
+    margin-bottom: 0;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+</style>
+{% endblock %}

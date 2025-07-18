@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Timeline - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Admin Sidebar -->
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user-shield"></i> Admin Panel</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('user_management') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-users"></i> User Management
+                    </a>
+                    <a href="{{ url_for('drone_management') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-drone"></i> Drone Management
+                    </a>
+                    <a href="{{ url_for('maintenance_alerts') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-exclamation-triangle"></i> Maintenance Alerts
+                    </a>
+                    <a href="{{ url_for('maintenance_timeline') }}" class="list-group-item list-group-item-action active">
+                        <i class="fas fa-timeline"></i> Maintenance Timeline
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9" data-user-role="admin">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-timeline"></i> Maintenance Timeline</h2>
+                <a href="{{ url_for('maintenance_alerts') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Maintenance
+                </a>
+            </div>
+            
+            <!-- Interactive Timeline -->
+            <div class="maintenance-timeline">
+                <!-- Sample Timeline Items -->
+                <div class="timeline-item completed" data-details="Database optimization completed successfully. Improved query performance by 40% and reduced response times.">
+                    <div class="timeline-content">
+                        <h5>Database Optimization</h5>
+                        <p>Optimized database queries and improved indexing for better performance.</p>
+                        <div class="timeline-time">
+                            <i class="fas fa-clock"></i> Completed 2 hours ago
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item in-progress" data-details="Currently updating server security patches. This includes OS updates, dependency updates, and security enhancements.">
+                    <div class="timeline-content">
+                        <h5>Security Updates</h5>
+                        <p>Applying latest security patches and updates to system components.</p>
+                        <div class="timeline-time">
+                            <i class="fas fa-clock"></i> In progress (30 min remaining)
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-warning" style="width: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item scheduled" data-details="Scheduled drone firmware update for all fleet vehicles. This update includes improved GPS accuracy and battery optimization.">
+                    <div class="timeline-content">
+                        <h5>Drone Firmware Update</h5>
+                        <p>Updating firmware for all drones in the fleet to version 2.4.1.</p>
+                        <div class="timeline-time">
+                            <i class="fas fa-clock"></i> Scheduled for tomorrow 2:00 AM
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item scheduled" data-details="Routine system backup and data archiving. This ensures all user data and system configurations are safely backed up.">
+                    <div class="timeline-content">
+                        <h5>System Backup</h5>
+                        <p>Performing routine system backup and data archiving.</p>
+                        <div class="timeline-time">
+                            <i class="fas fa-clock"></i> Scheduled for this weekend
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="timeline-item completed" data-details="Monthly server maintenance completed. All systems are running optimally with improved performance metrics.">
+                    <div class="timeline-content">
+                        <h5>Monthly Server Maintenance</h5>
+                        <p>Routine server maintenance and health checks completed successfully.</p>
+                        <div class="timeline-time">
+                            <i class="fas fa-clock"></i> Completed last week
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Maintenance Statistics -->
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="progress-ring" data-percentage="95">
+                                <svg>
+                                    <circle class="bg" cx="20" cy="20" r="16"></circle>
+                                    <circle class="progress" cx="20" cy="20" r="16"></circle>
+                                </svg>
+                                <div class="percentage">95%</div>
+                            </div>
+                            <h6 class="mt-2">System Uptime</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="progress-ring" data-percentage="100">
+                                <svg>
+                                    <circle class="bg" cx="20" cy="20" r="16"></circle>
+                                    <circle class="progress" cx="20" cy="20" r="16"></circle>
+                                </svg>
+                                <div class="percentage">100%</div>
+                            </div>
+                            <h6 class="mt-2">Tasks Completed</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="progress-ring" data-percentage="80">
+                                <svg>
+                                    <circle class="bg" cx="20" cy="20" r="16"></circle>
+                                    <circle class="progress" cx="20" cy="20" r="16"></circle>
+                                </svg>
+                                <div class="percentage">80%</div>
+                            </div>
+                            <h6 class="mt-2">Performance</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <div class="progress-ring" data-percentage="88">
+                                <svg>
+                                    <circle class="bg" cx="20" cy="20" r="16"></circle>
+                                    <circle class="progress" cx="20" cy="20" r="16"></circle>
+                                </svg>
+                                <div class="percentage">88%</div>
+                            </div>
+                            <h6 class="mt-2">Security Score</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

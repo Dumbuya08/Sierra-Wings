@@ -1,0 +1,332 @@
+<!-- Patient Dashboard Widgets - Centered, Minimized by Default -->
+<div class="row justify-content-center mb-4">
+    <div class="col-lg-10">
+        <div class="row justify-content-center">
+            
+            <!-- Weather Widget -->
+            <div class="col-md-4 mb-4">
+                <div class="card widget-card">
+                    <div class="card-header bg-primary text-white widget-header" onclick="toggleWidget('weather-widget')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cloud-sun me-2"></i>Flight Weather
+                            </h6>
+                            <i class="fas fa-chevron-down widget-toggle" id="weather-widget-toggle"></i>
+                        </div>
+                    </div>
+                    <div class="card-body widget-body collapse" id="weather-widget">
+                        <div class="text-center">
+                            <div id="weather-loading" class="spinner-border text-primary" role="status" style="display: none;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div id="weather-content">
+                                <div class="weather-info">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="weather-status mb-3">
+                                                <i class="fas fa-plane" style="font-size: 2rem; color: #28a745;"></i>
+                                                <h5 class="mt-2 mb-0" id="flight-status">Safe to Fly</h5>
+                                                <small class="text-muted" id="weather-location">Freetown, Sierra Leone</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="weather-detail">
+                                                <i class="fas fa-thermometer-half text-warning"></i>
+                                                <span id="temperature">25°C</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="weather-detail">
+                                                <i class="fas fa-wind text-info"></i>
+                                                <span id="wind-speed">8 km/h</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="weather-detail">
+                                                <i class="fas fa-eye text-secondary"></i>
+                                                <span id="visibility">10 km</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="weather-detail">
+                                                <i class="fas fa-cloud-rain text-primary"></i>
+                                                <span id="precipitation">0%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Delivery Widget -->
+            <div class="col-md-4 mb-4">
+                <div class="card widget-card">
+                    <div class="card-header bg-success text-white widget-header" onclick="toggleWidget('delivery-widget')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-truck-medical me-2"></i>My Deliveries
+                            </h6>
+                            <i class="fas fa-chevron-down widget-toggle" id="delivery-widget-toggle"></i>
+                        </div>
+                    </div>
+                    <div class="card-body widget-body collapse" id="delivery-widget">
+                        <div id="delivery-loading" class="text-center" style="display: none;">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div id="delivery-content">
+                            <div class="delivery-stats mb-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <h4 class="mb-0" id="active-deliveries">{{ active_missions or 0 }}</h4>
+                                            <small class="text-muted">Active</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <h4 class="mb-0" id="total-deliveries">{{ total_missions or 0 }}</h4>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="recent-deliveries">
+                                <h6 class="mb-2">Recent Deliveries</h6>
+                                <div id="recent-delivery-list">
+                                    {% if missions %}
+                                        {% for mission in missions[:3] %}
+                                        <div class="delivery-item mb-2">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <small class="fw-bold">{{ mission.mission_type.title() }} #{{ mission.id }}</small>
+                                                    <br>
+                                                    <small class="text-muted">{{ mission.requested_at.strftime('%m/%d %H:%M') }}</small>
+                                                </div>
+                                                <span class="badge bg-{{ 'success' if mission.status == 'completed' else 'warning' if mission.status == 'in_progress' else 'primary' }}">
+                                                    {{ mission.status.replace('_', ' ').title() }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="text-muted text-center">No deliveries yet</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Widget -->
+            <div class="col-md-4 mb-4">
+                <div class="card widget-card">
+                    <div class="card-header bg-info text-white widget-header" onclick="toggleWidget('activity-widget')">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>Recent Activity
+                            </h6>
+                            <i class="fas fa-chevron-down widget-toggle" id="activity-widget-toggle"></i>
+                        </div>
+                    </div>
+                    <div class="card-body widget-body collapse" id="activity-widget">
+                        <div id="activity-loading" class="text-center" style="display: none;">
+                            <div class="spinner-border text-info" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div id="activity-content">
+                            <div class="activity-list">
+                                {% set recent_activities = [
+                                    {"icon": "fas fa-user-edit", "text": "Profile updated", "time": "2 hours ago", "color": "primary"},
+                                    {"icon": "fas fa-ambulance", "text": "Emergency delivery requested", "time": "5 hours ago", "color": "danger"},
+                                    {"icon": "fas fa-check-circle", "text": "Delivery completed", "time": "1 day ago", "color": "success"},
+                                    {"icon": "fas fa-comment", "text": "Feedback submitted", "time": "2 days ago", "color": "info"}
+                                ] %}
+                                {% for activity in recent_activities %}
+                                <div class="activity-item mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="activity-icon me-3">
+                                            <i class="{{ activity.icon }} text-{{ activity.color }}"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="activity-text">{{ activity.text }}</div>
+                                            <small class="text-muted">{{ activity.time }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.widget-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.widget-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.widget-header {
+    cursor: pointer;
+    padding: 12px 16px;
+    border-bottom: none;
+}
+
+.widget-header:hover {
+    background-color: rgba(0,0,0,0.1) !important;
+}
+
+.widget-body {
+    padding: 16px;
+}
+
+.widget-toggle {
+    transition: transform 0.3s ease;
+}
+
+.widget-toggle.rotated {
+    transform: rotate(180deg);
+}
+
+.weather-detail {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.weather-status {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.stat-item {
+    padding: 8px 0;
+}
+
+.delivery-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.delivery-item:last-child {
+    border-bottom: none;
+}
+
+.activity-item {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 30px;
+    text-align: center;
+}
+
+.activity-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+</style>
+
+<script>
+function toggleWidget(widgetId) {
+    const widget = document.getElementById(widgetId);
+    const toggle = document.getElementById(widgetId + '-toggle');
+    
+    if (widget.classList.contains('show')) {
+        widget.classList.remove('show');
+        toggle.classList.remove('rotated');
+    } else {
+        widget.classList.add('show');
+        toggle.classList.add('rotated');
+    }
+}
+
+// Auto-refresh weather data every 30 seconds
+setInterval(function() {
+    updateWeatherWidget();
+}, 30000);
+
+function updateWeatherWidget() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Simulate weather data update
+            const weatherConditions = ['Safe to Fly', 'Caution', 'Unsafe to Fly'];
+            const temperatures = [22, 23, 24, 25, 26, 27, 28];
+            const windSpeeds = [5, 8, 12, 15, 18, 20];
+            
+            const randomCondition = weatherConditions[Math.floor(Math.random() * weatherConditions.length)];
+            const randomTemp = temperatures[Math.floor(Math.random() * temperatures.length)];
+            const randomWind = windSpeeds[Math.floor(Math.random() * windSpeeds.length)];
+            
+            document.getElementById('flight-status').textContent = randomCondition;
+            document.getElementById('temperature').textContent = randomTemp + '°C';
+            document.getElementById('wind-speed').textContent = randomWind + ' km/h';
+            
+            // Update flight status color
+            const statusEl = document.getElementById('flight-status');
+            const iconEl = statusEl.parentElement.querySelector('i');
+            
+            if (randomCondition === 'Safe to Fly') {
+                iconEl.style.color = '#28a745';
+                statusEl.style.color = '#28a745';
+            } else if (randomCondition === 'Caution') {
+                iconEl.style.color = '#ffc107';
+                statusEl.style.color = '#ffc107';
+            } else {
+                iconEl.style.color = '#dc3545';
+                statusEl.style.color = '#dc3545';
+            }
+        });
+    }
+}
+
+// Auto-refresh delivery data every 30 seconds
+setInterval(function() {
+    updateDeliveryWidget();
+}, 30000);
+
+function updateDeliveryWidget() {
+    fetch('/api/missions/stats')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('active-deliveries').textContent = data.active || 0;
+            document.getElementById('total-deliveries').textContent = data.total || 0;
+        })
+        .catch(error => console.error('Error updating delivery widget:', error));
+}
+
+// Initialize widgets on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateWeatherWidget();
+    updateDeliveryWidget();
+});
+</script>

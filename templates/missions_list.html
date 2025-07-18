@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}My Delivery History - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 text-dark">My Delivery History</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('request_delivery') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>New Delivery Request
+                    </a>
+                </div>
+            </div>
+
+            {% if missions %}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                {% for mission in missions %}
+                                <div class="mission-card p-4 mb-4 border rounded" style="background: white; border-left: 4px solid {% if mission.status == 'completed' %}#28a745{% elif mission.status == 'in_progress' %}#ffc107{% elif mission.status == 'accepted' %}#007bff{% elif mission.status == 'cancelled' %}#dc3545{% else %}#6c757d{% endif %} !important;">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <i class="fas fa-{{ 'ambulance' if mission.mission_type == 'emergency' else 'box' }} me-3 text-primary" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <h5 class="mb-0 text-dark">{{ mission.mission_type.title() }} Delivery #{{ mission.id }}</h5>
+                                                    <small class="text-muted">Requested on {{ mission.requested_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <span class="badge bg-{% if mission.status == 'completed' %}success{% elif mission.status == 'in_progress' %}warning{% elif mission.status == 'accepted' %}primary{% elif mission.status == 'cancelled' %}danger{% else %}secondary{% endif %} me-2" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                                                    {% if mission.status == 'in_progress' %}
+                                                        In Progress
+                                                    {% elif mission.status == 'completed' %}
+                                                        Completed
+                                                    {% elif mission.status == 'accepted' %}
+                                                        Accepted
+                                                    {% elif mission.status == 'requested' %}
+                                                        Requested
+                                                    {% elif mission.status == 'cancelled' %}
+                                                        Cancelled
+                                                    {% else %}
+                                                        {{ mission.status.replace('_', ' ').title() }}
+                                                    {% endif %}
+                                                </span>
+                                                <span class="badge bg-{% if mission.priority == 'emergency' %}danger{% elif mission.priority == 'high' %}warning{% else %}info{% endif %}" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                                                    {{ mission.priority.title() }} Priority
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="fas fa-map-marker-alt text-success me-2 mt-1"></i>
+                                                        <div>
+                                                            <strong class="text-dark">Pickup Address:</strong><br>
+                                                            <span class="text-muted">{{ mission.pickup_address }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="d-flex align-items-start">
+                                                        <i class="fas fa-map-marker-alt text-danger me-2 mt-1"></i>
+                                                        <div>
+                                                            <strong class="text-dark">Delivery Address:</strong><br>
+                                                            <span class="text-muted">{{ mission.delivery_address }}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if mission.medical_items %}
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="fas fa-pills text-info me-2 mt-1"></i>
+                                                    <div>
+                                                        <strong class="text-dark">Medical Items:</strong><br>
+                                                        <span class="text-muted">{{ mission.medical_items }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if mission.special_instructions %}
+                                            <div class="mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="fas fa-info-circle text-warning me-2 mt-1"></i>
+                                                    <div>
+                                                        <strong class="text-dark">Special Instructions:</strong><br>
+                                                        <span class="text-muted">{{ mission.special_instructions }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        {% if mission.scheduled_at %}
+                                                            Scheduled: {{ mission.scheduled_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                        {% else %}
+                                                            Requested: {{ mission.requested_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    {% if mission.cost %}
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-dollar-sign me-1"></i>Cost: ${{ "%.2f"|format(mission.cost) }}
+                                                    </small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4 text-end">
+                                            <div class="d-flex flex-column gap-2">
+                                                <a href="{{ url_for('track_mission', mission_id=mission.id) }}" class="btn btn-outline-primary">
+                                                    <i class="fas fa-eye me-2"></i>Track Mission
+                                                </a>
+                                                <a href="{{ url_for('view_mission', mission_id=mission.id) }}" class="btn btn-outline-info">
+                                                    <i class="fas fa-info-circle me-2"></i>View Details
+                                                </a>
+                                                {% if mission.status in ['requested', 'accepted'] %}
+                                                <button class="btn btn-outline-danger" onclick="cancelMission({{ mission.id }})">
+                                                    <i class="fas fa-times me-2"></i>Cancel
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box text-muted mb-4" style="font-size: 4rem;"></i>
+                    <h4 class="text-dark">No delivery requests yet</h4>
+                    <p class="text-muted mb-4">You haven't requested any medical deliveries yet. Start by requesting your first delivery.</p>
+                    <a href="{{ url_for('request_delivery') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Request Your First Delivery
+                    </a>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<style>
+.mission-card {
+    transition: all 0.3s ease;
+    border-radius: 12px !important;
+}
+
+.mission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function cancelMission(missionId) {
+    if (confirm('Are you sure you want to cancel this delivery request?')) {
+        fetch(`/api/missions/${missionId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to cancel mission');
+        });
+    }
+}
+</script>
+{% endblock %}

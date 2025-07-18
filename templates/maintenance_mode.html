@@ -1,0 +1,322 @@
+<!-- Maintenance Mode Banner -->
+<div id="maintenanceBanner" class="maintenance-banner" style="display: none;">
+    <div class="maintenance-content">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="maintenance-info">
+                        <h4 class="mb-2">
+                            <i class="fas fa-tools me-2"></i>
+                            System Maintenance in Progress
+                        </h4>
+                        <p class="mb-0" id="maintenanceMessage">
+                            We are currently performing system maintenance to improve your experience. Some features may be temporarily unavailable.
+                        </p>
+                        <small class="text-muted" id="maintenanceTime">
+                            Expected completion: <span id="maintenanceETA">--:--</span>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <div class="maintenance-actions">
+                        <button class="btn btn-light btn-sm" onclick="refreshMaintenanceStatus()">
+                            <i class="fas fa-sync me-1"></i>Check Status
+                        </button>
+                        <button class="btn btn-outline-light btn-sm" onclick="hideMaintenance()">
+                            <i class="fas fa-times me-1"></i>Dismiss
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Full Screen Maintenance Mode -->
+<div id="fullMaintenanceMode" class="full-maintenance-mode" style="display: none;">
+    <div class="maintenance-overlay">
+        <div class="maintenance-modal">
+            <div class="text-center">
+                <div class="maintenance-icon">
+                    <i class="fas fa-cog fa-spin"></i>
+                </div>
+                <h2>System Under Maintenance</h2>
+                <p class="lead">SierraWings is currently undergoing scheduled maintenance to improve our services.</p>
+                
+                <div class="maintenance-details">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="maintenance-stat">
+                                <i class="fas fa-clock"></i>
+                                <h6>Duration</h6>
+                                <span id="maintenanceDuration">Approximately 2 hours</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="maintenance-stat">
+                                <i class="fas fa-calendar"></i>
+                                <h6>Started</h6>
+                                <span id="maintenanceStart">2:00 AM GMT</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="maintenance-stat">
+                                <i class="fas fa-check-circle"></i>
+                                <h6>Expected End</h6>
+                                <span id="maintenanceEnd">4:00 AM GMT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="maintenance-updates">
+                    <h6>What's being improved:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Enhanced drone tracking system</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i>Improved notification delivery</li>
+                        <li><i class="fas fa-spinner fa-spin text-primary me-2"></i>Database optimization</li>
+                        <li><i class="fas fa-clock text-muted me-2"></i>Security enhancements</li>
+                    </ul>
+                </div>
+                
+                <div class="maintenance-contact">
+                    <p>For urgent medical emergencies, please contact your local emergency services directly.</p>
+                    <p class="text-muted">
+                        For updates: <a href="mailto:sierrawingsofficial@gmail.com" class="text-primary">sierrawingsofficial@gmail.com</a>
+                    </p>
+                </div>
+                
+                <div class="maintenance-actions">
+                    <button class="btn btn-primary btn-lg" onclick="refreshMaintenanceStatus()">
+                        <i class="fas fa-sync me-2"></i>Check Status
+                    </button>
+                    <a href="https://chat.whatsapp.com/DNVfWh3a5BQ2FWhvpJArgc" class="btn btn-success btn-lg" target="_blank">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp Community
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let maintenanceCheckInterval;
+
+function checkMaintenanceStatus() {
+    fetch('/api/maintenance-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.maintenance) {
+                if (data.fullScreen) {
+                    showFullMaintenance(data);
+                } else {
+                    showMaintenanceBanner(data);
+                }
+            } else {
+                hideMaintenance();
+            }
+        })
+        .catch(error => {
+            console.error('Error checking maintenance status:', error);
+        });
+}
+
+function showMaintenanceBanner(data) {
+    const banner = document.getElementById('maintenanceBanner');
+    const message = document.getElementById('maintenanceMessage');
+    const eta = document.getElementById('maintenanceETA');
+    
+    message.textContent = data.message || 'System maintenance in progress';
+    eta.textContent = data.eta || '--:--';
+    
+    banner.style.display = 'block';
+    document.body.style.paddingTop = '80px'; // Adjust for banner height
+}
+
+function showFullMaintenance(data) {
+    const modal = document.getElementById('fullMaintenanceMode');
+    const duration = document.getElementById('maintenanceDuration');
+    const start = document.getElementById('maintenanceStart');
+    const end = document.getElementById('maintenanceEnd');
+    
+    duration.textContent = data.duration || 'Approximately 2 hours';
+    start.textContent = data.startTime || '2:00 AM GMT';
+    end.textContent = data.endTime || '4:00 AM GMT';
+    
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function hideMaintenance() {
+    document.getElementById('maintenanceBanner').style.display = 'none';
+    document.getElementById('fullMaintenanceMode').style.display = 'none';
+    document.body.style.paddingTop = '0';
+    document.body.style.overflow = 'auto';
+}
+
+function refreshMaintenanceStatus() {
+    checkMaintenanceStatus();
+}
+
+// Check maintenance status on page load and every 30 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    checkMaintenanceStatus();
+    maintenanceCheckInterval = setInterval(checkMaintenanceStatus, 30000);
+});
+
+// Clean up interval when page unloads
+window.addEventListener('beforeunload', function() {
+    if (maintenanceCheckInterval) {
+        clearInterval(maintenanceCheckInterval);
+    }
+});
+</script>
+
+<style>
+.maintenance-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    z-index: 9999;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.maintenance-content {
+    padding: 15px 0;
+}
+
+.maintenance-info h4 {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.maintenance-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.full-maintenance-mode {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.maintenance-overlay {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.maintenance-icon {
+    font-size: 4rem;
+    color: #3498db;
+    margin-bottom: 1rem;
+}
+
+.maintenance-details {
+    margin: 2rem 0;
+}
+
+.maintenance-stat {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.maintenance-stat i {
+    font-size: 1.5rem;
+    color: #3498db;
+    margin-bottom: 0.5rem;
+}
+
+.maintenance-stat h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.maintenance-updates {
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.maintenance-updates ul {
+    margin-top: 1rem;
+}
+
+.maintenance-updates li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.maintenance-contact {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.maintenance-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .maintenance-overlay {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .maintenance-actions {
+        flex-direction: column;
+    }
+    
+    .maintenance-banner .maintenance-actions {
+        margin-top: 1rem;
+    }
+    
+    .maintenance-stat {
+        margin-bottom: 0.5rem;
+    }
+}
+</style>

@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}User Violations - Admin - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">User Violations Management</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                        Users with Policy Violations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if users %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Violations</th>
+                                        <th>Last Violation</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr>
+                                        <td>
+                                            <div>
+                                                <strong>{{ user.first_name }} {{ user.last_name }}</strong><br>
+                                                <small class="text-muted">@{{ user.username }}</small><br>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if user.role == 'patient' else 'info' if user.role == 'clinic' else 'warning' }}">
+                                                {{ user.role.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger">{{ user.violation_count }}</span>
+                                        </td>
+                                        <td>
+                                            {% if user.last_violation_date %}
+                                                {{ user.last_violation_date.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                <span class="text-muted">Never</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if user.is_active %}
+                                                <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Deactivated</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewNotesModal{{ user.id }}">
+                                                    <i class="fas fa-eye"></i> View Notes
+                                                </button>
+                                                
+                                                {% if user.is_active %}
+                                                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deactivateModal{{ user.id }}">
+                                                        <i class="fas fa-ban"></i> Deactivate
+                                                    </button>
+                                                {% else %}
+                                                    <form method="POST" action="{{ url_for('reactivate_user', user_id=user.id) }}" class="d-inline">
+                                                        <button type="submit" class="btn btn-outline-success">
+                                                            <i class="fas fa-check"></i> Reactivate
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- View Notes Modal -->
+                                    <div class="modal fade" id="viewNotesModal{{ user.id }}" tabindex="-1">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Violation Notes - {{ user.username }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <strong>User Details:</strong><br>
+                                                        Name: {{ user.first_name }} {{ user.last_name }}<br>
+                                                        Email: {{ user.email }}<br>
+                                                        Role: {{ user.role.title() }}<br>
+                                                        Account Created: {{ user.created_at.strftime('%Y-%m-%d %H:%M') }}<br>
+                                                        Total Violations: {{ user.violation_count }}
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <strong>Violation History:</strong><br>
+                                                        {% if user.violation_notes %}
+                                                            <pre class="bg-light p-2 rounded">{{ user.violation_notes }}</pre>
+                                                        {% else %}
+                                                            <p class="text-muted">No violation notes recorded.</p>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Deactivate Modal -->
+                                    <div class="modal fade" id="deactivateModal{{ user.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Deactivate User Account</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form method="POST" action="{{ url_for('deactivate_user', user_id=user.id) }}">
+                                                    <div class="modal-body">
+                                                        <div class="alert alert-warning">
+                                                            <i class="fas fa-exclamation-triangle"></i>
+                                                            <strong>Warning:</strong> This will deactivate the user account and prevent login.
+                                                        </div>
+                                                        
+                                                        <p><strong>User:</strong> {{ user.first_name }} {{ user.last_name }} (@{{ user.username }})</p>
+                                                        <p><strong>Current Violations:</strong> {{ user.violation_count }}</p>
+                                                        
+                                                        <div class="mb-3">
+                                                            <label for="reason" class="form-label">Reason for Deactivation:</label>
+                                                            <textarea class="form-control" id="reason" name="reason" rows="3" placeholder="Enter reason for deactivation..." required></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-danger">Deactivate Account</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                            <h4>No Violations Found</h4>
+                            <p class="text-muted">All users are currently in good standing with no policy violations.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Violation Policy</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-exclamation-triangle text-warning"></i> First violation: Warning</li>
+                        <li><i class="fas fa-ban text-danger"></i> Multiple violations: Account suspension</li>
+                        <li><i class="fas fa-trash text-danger"></i> Severe violations: Account termination</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Common Violations</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-user-times text-danger"></i> Underage registration (under 13)</li>
+                        <li><i class="fas fa-id-card text-danger"></i> False identity information</li>
+                        <li><i class="fas fa-shield-alt text-danger"></i> Privacy policy violations</li>
+                        <li><i class="fas fa-gavel text-danger"></i> Terms of service breaches</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

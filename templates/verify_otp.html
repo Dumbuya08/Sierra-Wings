@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Email - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-envelope-open-text me-2"></i>
+                        Verify Your Email
+                    </h3>
+                </div>
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            A 6-digit verification code has been sent to <strong>{{ user.email }}</strong>
+                        </div>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.verify_email') }}">
+                        <div class="mb-4">
+                            <label for="otp_code" class="form-label">Enter Verification Code</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="otp_code" name="otp_code" 
+                                   placeholder="000000" 
+                                   maxlength="6" 
+                                   pattern="[0-9]{6}"
+                                   required
+                                   style="letter-spacing: 0.5em; font-size: 1.5rem;">
+                            <div class="form-text">Enter the 6-digit code from your email</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Verify Email
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted">Didn't receive the code?</p>
+                        <form method="POST" action="{{ url_for('auth.resend_verification') }}" style="display: inline;">
+                            <button type="submit" class="btn btn-link">
+                                <i class="fas fa-redo me-2"></i>Resend Code
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-focus on OTP input and format
+document.addEventListener('DOMContentLoaded', function() {
+    const otpInput = document.getElementById('otp_code');
+    otpInput.focus();
+    
+    // Format OTP input as user types
+    otpInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+        if (value.length <= 6) {
+            e.target.value = value;
+        } else {
+            e.target.value = value.substring(0, 6);
+        }
+    });
+    
+    // Submit form when 6 digits are entered
+    otpInput.addEventListener('input', function(e) {
+        if (e.target.value.length === 6) {
+            // Auto-submit after a short delay
+            setTimeout(() => {
+                e.target.closest('form').submit();
+            }, 500);
+        }
+    });
+});
+</script>
+{% endblock %}

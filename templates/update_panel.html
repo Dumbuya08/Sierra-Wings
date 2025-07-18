@@ -1,0 +1,193 @@
+<!-- Update Panel for displaying admin messages -->
+<div id="update-panel" class="update-panel" style="display: none;">
+    <div class="update-messages" id="update-messages"></div>
+</div>
+
+<style>
+.update-panel {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    width: 350px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border: 1px solid #ddd;
+}
+
+.update-message {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    position: relative;
+}
+
+.update-message:last-child {
+    border-bottom: none;
+}
+
+.update-message.info {
+    border-left: 4px solid #17a2b8;
+}
+
+.update-message.warning {
+    border-left: 4px solid #ffc107;
+}
+
+.update-message.success {
+    border-left: 4px solid #28a745;
+}
+
+.update-message.danger {
+    border-left: 4px solid #dc3545;
+}
+
+.update-message h6 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-weight: 600;
+}
+
+.update-message p {
+    margin: 0 0 8px 0;
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.update-message .message-time {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.update-message .dismiss-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 2px 4px;
+}
+
+.update-message .dismiss-btn:hover {
+    color: #666;
+}
+
+.update-panel-empty {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+}
+
+@media (max-width: 768px) {
+    .update-panel {
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+}
+</style>
+
+<script>
+// Update panel management
+// Check if already initialized to prevent duplicate declarations
+if (typeof window.UpdatePanel === 'undefined') {
+    window.UpdatePanel = class UpdatePanel {
+    constructor() {
+        this.panel = document.getElementById('update-panel');
+        this.container = document.getElementById('update-messages');
+        this.checkInterval = null;
+        this.init();
+    }
+
+    init() {
+        this.loadUpdates();
+        // Check for new updates every 30 seconds
+        this.checkInterval = setInterval(() => {
+            this.loadUpdates();
+        }, 30000);
+    }
+
+    async loadUpdates() {
+        try {
+            const response = await fetch('/api/updates/active');
+            const updates = await response.json();
+            
+            if (updates.length > 0) {
+                this.displayUpdates(updates);
+                this.panel.style.display = 'block';
+            } else {
+                this.panel.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading updates:', error);
+        }
+    }
+
+    displayUpdates(updates) {
+        this.container.innerHTML = '';
+        
+        updates.forEach(update => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `update-message ${update.type}`;
+            
+            messageDiv.innerHTML = `
+                <button class="dismiss-btn" onclick="updatePanel.dismissMessage(${update.id})">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h6>${update.title}</h6>
+                <p>${update.message}</p>
+                <div class="message-time">
+                    <i class="fas fa-clock"></i> ${update.created_at}
+                </div>
+            `;
+            
+            this.container.appendChild(messageDiv);
+        });
+    }
+
+    async dismissMessage(messageId) {
+        try {
+            const response = await fetch(`/api/updates/${messageId}/dismiss`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                this.loadUpdates(); // Refresh the display
+            }
+        } catch (error) {
+            console.error('Error dismissing message:', error);
+        }
+    }
+
+    destroy() {
+        if (this.checkInterval) {
+            clearInterval(this.checkInterval);
+        }
+    }
+    };
+}
+
+// Initialize update panel when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Only initialize if user is authenticated and not already initialized
+    if (document.body.dataset.userRole !== 'guest' && !window.updatePanel) {
+        window.updatePanel = new window.UpdatePanel();
+    }
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', function() {
+    if (window.updatePanel) {
+        window.updatePanel.destroy();
+    }
+});
+</script>

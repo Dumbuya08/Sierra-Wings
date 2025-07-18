@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Request - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="emergency-header text-center mb-4">
+                <div class="emergency-icon">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                </div>
+                <h1 class="text-danger">Emergency Medical Request</h1>
+                <p class="lead">Request immediate medical drone delivery for emergency situations</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card emergency-card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-ambulance me-2"></i>
+                        Emergency Delivery Request
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="emergencyForm" action="{{ url_for('request_delivery') }}" method="POST">
+                        <input type="hidden" name="priority" value="emergency">
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="patient_name" class="form-label">Patient Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="emergency_contact" class="form-label">Emergency Contact <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="emergency_contact" name="emergency_contact" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="medical_condition" class="form-label">Medical Condition/Emergency <span class="text-danger">*</span></label>
+                            <select class="form-control" id="medical_condition" name="medical_condition" required>
+                                <option value="">Select emergency type</option>
+                                <option value="cardiac_arrest">Cardiac Arrest</option>
+                                <option value="severe_bleeding">Severe Bleeding</option>
+                                <option value="respiratory_distress">Respiratory Distress</option>
+                                <option value="stroke">Stroke</option>
+                                <option value="trauma">Major Trauma</option>
+                                <option value="poisoning">Poisoning</option>
+                                <option value="allergic_reaction">Severe Allergic Reaction</option>
+                                <option value="diabetic_emergency">Diabetic Emergency</option>
+                                <option value="other">Other Emergency</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="medical_items" class="form-label">Required Medical Items <span class="text-danger">*</span></label>
+                            <select class="form-control" id="medical_items" name="medical_items" required>
+                                <option value="">Select required items</option>
+                                <option value="adrenaline">Adrenaline/Epinephrine</option>
+                                <option value="defibrillator">Portable Defibrillator</option>
+                                <option value="oxygen">Oxygen Tank</option>
+                                <option value="blood_products">Blood Products</option>
+                                <option value="bandages">Emergency Bandages</option>
+                                <option value="insulin">Insulin</option>
+                                <option value="medications">Critical Medications</option>
+                                <option value="iv_fluids">IV Fluids</option>
+                                <option value="emergency_kit">Complete Emergency Kit</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="delivery_location" class="form-label">Delivery Location <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="delivery_location" name="delivery_location" required placeholder="Enter exact address or landmark">
+                                <button class="btn btn-outline-primary" type="button" onclick="getCurrentLocation()">
+                                    <i class="fas fa-location-arrow"></i> Current Location
+                                </button>
+                            </div>
+                            <div class="form-text">Provide precise location for emergency delivery</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="additional_notes" class="form-label">Additional Information</label>
+                            <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" placeholder="Any additional details about the emergency..."></textarea>
+                        </div>
+
+                        <div class="emergency-actions">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-danger btn-lg w-100 emergency-submit">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Send Emergency Request
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{{ url_for('patient_dashboard') }}" class="btn btn-outline-secondary btn-lg w-100">
+                                        <i class="fas fa-arrow-left me-2"></i>
+                                        Back to Dashboard
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Contacts Card -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-phone me-2"></i>
+                        Emergency Contacts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-ambulance fa-2x text-danger mb-2"></i>
+                            <h6>National Emergency</h6>
+                            <p><strong>999</strong></p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-hospital fa-2x text-primary mb-2"></i>
+                            <h6>SierraWings Support</h6>
+                            <p><strong>+232 30 700 479</strong></p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <i class="fas fa-envelope fa-2x text-success mb-2"></i>
+                            <h6>Email Support</h6>
+                            <p><strong>sierrawingsofficial@gmail.com</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.emergency-header {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 30px;
+    margin: -20px -20px 20px -20px;
+    border-radius: 10px;
+}
+
+.emergency-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.emergency-card {
+    border: 3px solid #dc3545;
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.3);
+}
+
+.emergency-submit {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border: none;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+}
+
+.emergency-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(220, 53, 69, 0.4);
+}
+
+.form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.emergency-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #f8f9fa;
+}
+
+@media (max-width: 768px) {
+    .emergency-header {
+        margin: -15px -15px 15px -15px;
+        padding: 20px;
+    }
+    
+    .emergency-icon {
+        font-size: 3rem;
+    }
+}
+</style>
+
+<script>
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Use reverse geocoding to get address
+            fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=YOUR_API_KEY`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        document.getElementById('delivery_location').value = data.results[0].formatted;
+                    } else {
+                        document.getElementById('delivery_location').value = `${lat}, ${lon}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting address:', error);
+                    document.getElementById('delivery_location').value = `${lat}, ${lon}`;
+                });
+        }, function(error) {
+            alert('Unable to get your location. Please enter address manually.');
+        });
+    } else {
+        alert('Geolocation is not supported by this browser.');
+    }
+}
+
+// Form validation
+document.getElementById('emergencyForm').addEventListener('submit', function(e) {
+    const requiredFields = ['patient_name', 'emergency_contact', 'medical_condition', 'medical_items', 'delivery_location'];
+    let isValid = true;
+    
+    requiredFields.forEach(function(field) {
+        const input = document.getElementById(field);
+        if (!input.value.trim()) {
+            input.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            input.classList.remove('is-invalid');
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fill in all required fields.');
+    }
+});
+</script>
+{% endblock %}

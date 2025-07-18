@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Search Hospitals - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 text-white">Search Hospitals</h1>
+                <a href="{{ url_for('patient_dashboard') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('search_hospitals') }}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="search" class="form-label">Hospital Name</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="search" 
+                                           name="search" 
+                                           value="{{ search }}"
+                                           placeholder="Search by hospital name">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="location" class="form-label">Location</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="location" 
+                                           name="location" 
+                                           value="{{ location }}"
+                                           placeholder="City or region">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="service" class="form-label">Service</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="service" 
+                                           name="service" 
+                                           value="{{ service }}"
+                                           placeholder="Search by service">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-warning me-2">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                                <a href="{{ url_for('search_hospitals') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="row">
+                {% if hospitals %}
+                    {% for hospital in hospitals %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">{{ hospital.name }}</h5>
+                                    {% if hospital.verified %}
+                                    <span class="badge bg-success">Verified</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Unverified</span>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if hospital.address %}
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                        {{ hospital.address }}
+                                        {% if hospital.city %}, {{ hospital.city }}{% endif %}
+                                        {% if hospital.region %}, {{ hospital.region }}{% endif %}
+                                    </small>
+                                </p>
+                                {% endif %}
+                                
+                                <!-- Contact Information -->
+                                <div class="mb-3">
+                                    {% if hospital.phone %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-phone me-1"></i>{{ hospital.phone }}
+                                    </div>
+                                    {% endif %}
+                                    {% if hospital.email %}
+                                    <div class="small text-muted">
+                                        <i class="fas fa-envelope me-1"></i>{{ hospital.email }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Services -->
+                                {% if hospital.services %}
+                                <div class="mb-3">
+                                    <h6 class="text-muted">Services Available:</h6>
+                                    <div class="d-flex flex-wrap">
+                                        {% for service in hospital.services[:3] %}
+                                        <span class="badge bg-info me-1 mb-1">{{ service.service_name }}</span>
+                                        {% endfor %}
+                                        {% if hospital.services|length > 3 %}
+                                        <span class="badge bg-secondary">+{{ hospital.services|length - 3 }} more</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Operating Hours -->
+                                {% if hospital.operating_hours %}
+                                <div class="mb-3">
+                                    <h6 class="text-muted">Hours:</h6>
+                                    <small class="text-muted">
+                                        {% for day, hours in hospital.operating_hours.items() %}
+                                        {{ day|title }}: {{ hours }}<br>
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-primary" 
+                                            onclick="showHospitalDetails({{ hospital.id }})">
+                                        <i class="fas fa-info-circle me-1"></i>Details
+                                    </button>
+                                    <a href="{{ url_for('request_delivery') }}?hospital_id={{ hospital.id }}" 
+                                       class="btn btn-sm btn-warning">
+                                        <i class="fas fa-plus me-1"></i>Request Delivery
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="text-muted">
+                                    <i class="fas fa-hospital fa-3x mb-3"></i>
+                                    <h5>No hospitals found</h5>
+                                    <p>Try adjusting your search criteria or check back later for new hospitals.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Search Statistics -->
+            {% if hospitals %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Found {{ hospitals|length }} hospital(s) matching your criteria.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Hospital Details Modal -->
+<div class="modal fade" id="hospitalDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Hospital Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="hospitalDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showHospitalDetails(hospitalId) {
+    // Find hospital data from the page
+    const hospitals = {{ hospitals | tojson | safe }};
+    const hospital = hospitals.find(h => h.id === hospitalId);
+    
+    if (hospital) {
+        let content = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Contact Information</h6>
+                    <p><strong>Name:</strong> ${hospital.name}</p>
+                    <p><strong>Email:</strong> ${hospital.email || 'Not provided'}</p>
+                    <p><strong>Phone:</strong> ${hospital.phone || 'Not provided'}</p>
+                    <p><strong>Address:</strong> ${hospital.address || 'Not provided'}</p>
+                    <p><strong>City:</strong> ${hospital.city || 'Not provided'}</p>
+                    <p><strong>Region:</strong> ${hospital.region || 'Not provided'}</p>
+                    <p><strong>Status:</strong> ${hospital.verified ? 'Verified' : 'Unverified'}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Services Available</h6>
+        `;
+        
+        if (hospital.services && hospital.services.length > 0) {
+            content += '<ul>';
+            hospital.services.forEach(service => {
+                content += `<li>${service.service_name} (${service.service_category})`;
+                if (service.base_price) {
+                    content += ` - ${service.base_price} ${service.currency}`;
+                }
+                content += '</li>';
+            });
+            content += '</ul>';
+        } else {
+            content += '<p class="text-muted">No services listed</p>';
+        }
+        
+        content += `
+                </div>
+            </div>
+        `;
+        
+        if (hospital.operating_hours) {
+            content += `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Operating Hours</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
+            
+            Object.keys(hospital.operating_hours).forEach(day => {
+                content += `
+                    <tr>
+                        <td>${day.charAt(0).toUpperCase() + day.slice(1)}</td>
+                        <td>${hospital.operating_hours[day]}</td>
+                    </tr>
+                `;
+            });
+            
+            content += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        document.getElementById('hospitalDetailsContent').innerHTML = content;
+        new bootstrap.Modal(document.getElementById('hospitalDetailsModal')).show();
+    }
+}
+</script>
+{% endblock %}

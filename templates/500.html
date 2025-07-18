@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="text-center py-5">
+                <div class="error-icon mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 6rem;"></i>
+                </div>
+                <h1 class="display-1 fw-bold text-danger">500</h1>
+                <h2 class="mb-3">Internal Server Error</h2>
+                <p class="lead text-muted mb-4">
+                    Something went wrong on our end. Our team has been notified and is working to fix the issue.
+                </p>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                    <button onclick="location.reload()" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-sync"></i> Try Again
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <p class="text-muted">
+                        For urgent medical emergencies, call 
+                        <a href="tel:+23230700479" class="text-danger fw-bold">+232 30 700 479</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,323 @@
+<!-- Floating Feedback Button (Hidden) -->
+<div id="floating-feedback-btn" class="floating-feedback-button" style="display: none;">
+    <i class="fas fa-comment-dots"></i>
+    <span class="feedback-text" style="display: none;">Quick Feedback</span>
+</div>
+
+<!-- Floating Feedback Modal -->
+<div class="modal fade" id="floatingFeedbackModal" tabindex="-1" aria-labelledby="floatingFeedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="floatingFeedbackModalLabel">
+                    <i class="fas fa-comment-dots me-2"></i>Feedback
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='images/sierrawings-logo.jpg') }}" alt="SierraWings Logo" style="height: 60px; width: auto;">
+                    <h6 class="mt-2">We value your feedback!</h6>
+                    <p class="text-muted">Your feedback helps us improve SierraWings medical delivery services.</p>
+                </div>
+                
+                <form id="floatingFeedbackForm">
+                    <div class="mb-3">
+                        <label for="feedbackType" class="form-label">Feedback Type</label>
+                        <select class="form-select" id="feedbackType" required>
+                            <option value="">Select feedback type</option>
+                            <option value="bug">Bug Report</option>
+                            <option value="suggestion">Suggestion</option>
+                            <option value="compliment">Compliment</option>
+                            <option value="complaint">Complaint</option>
+                            <option value="feature">Feature Request</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="feedbackPriority" class="form-label">Priority Level</label>
+                        <select class="form-select" id="feedbackPriority" required>
+                            <option value="">Select priority</option>
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="feedbackMessage" class="form-label">Your Feedback</label>
+                        <textarea class="form-control" id="feedbackMessage" rows="4" required 
+                                  placeholder="Please provide detailed feedback..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Rate Your Experience</label>
+                        <div class="rating-stars">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowFollowUp">
+                            <label class="form-check-label" for="allowFollowUp">
+                                Allow follow-up communication about this feedback
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const floatingBtn = document.getElementById('floating-feedback-btn');
+    const modal = new bootstrap.Modal(document.getElementById('floatingFeedbackModal'));
+    
+    // Make button draggable
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+    
+    floatingBtn.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialX = floatingBtn.offsetLeft;
+        initialY = floatingBtn.offsetTop;
+        floatingBtn.style.cursor = 'grabbing';
+    });
+    
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        let newX = initialX + dx;
+        let newY = initialY + dy;
+        
+        // Keep within viewport bounds
+        newX = Math.max(0, Math.min(newX, window.innerWidth - floatingBtn.offsetWidth));
+        newY = Math.max(0, Math.min(newY, window.innerHeight - floatingBtn.offsetHeight));
+        
+        floatingBtn.style.left = newX + 'px';
+        floatingBtn.style.top = newY + 'px';
+        floatingBtn.style.right = 'auto';
+        floatingBtn.style.bottom = 'auto';
+    });
+    
+    document.addEventListener('mouseup', function() {
+        if (isDragging) {
+            isDragging = false;
+            floatingBtn.style.cursor = 'pointer';
+        }
+    });
+    
+    // Click to open modal (only if not dragging)
+    floatingBtn.addEventListener('click', function(e) {
+        if (!isDragging) {
+            modal.show();
+        }
+    });
+    
+    // Star rating functionality
+    const stars = document.querySelectorAll('.star');
+    let selectedRating = 0;
+    
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            updateStars();
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const hoverRating = parseInt(this.dataset.rating);
+            highlightStars(hoverRating);
+        });
+    });
+    
+    document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+        updateStars();
+    });
+    
+    function updateStars() {
+        stars.forEach((star, index) => {
+            star.classList.toggle('active', index < selectedRating);
+        });
+    }
+    
+    function highlightStars(rating) {
+        stars.forEach((star, index) => {
+            star.classList.toggle('hover', index < rating);
+        });
+    }
+    
+    // Form submission
+    document.getElementById('floatingFeedbackForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+            type: document.getElementById('feedbackType').value,
+            priority: document.getElementById('feedbackPriority').value,
+            message: document.getElementById('feedbackMessage').value,
+            rating: selectedRating,
+            allowFollowUp: document.getElementById('allowFollowUp').checked,
+            userInfo: {
+                username: '{{ current_user.username if current_user and current_user.is_authenticated else "Anonymous" }}',
+                role: '{{ current_user.role if current_user and current_user.is_authenticated else "Guest" }}',
+                email: '{{ current_user.email if current_user and current_user.is_authenticated else "Not provided" }}'
+            },
+            timestamp: new Date().toISOString()
+        };
+        
+        // Create email body
+        const emailBody = `
+SierraWings Feedback Submission
+================================
+
+Feedback Type: ${formData.type}
+Priority: ${formData.priority}
+Rating: ${formData.rating}/5 stars
+
+Message:
+${formData.message}
+
+User Information:
+- Username: ${formData.userInfo.username}
+- Role: ${formData.userInfo.role}
+- Email: ${formData.userInfo.email}
+- Allow Follow-up: ${formData.allowFollowUp ? 'Yes' : 'No'}
+
+Submitted: ${new Date(formData.timestamp).toLocaleString()}
+        `.trim();
+        
+        // Send email
+        const mailtoLink = `mailto:sierrawingsofficial@gmail.com?subject=SierraWings Feedback - ${formData.type} (${formData.priority} Priority)&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoLink;
+        
+        // Close modal and reset form
+        modal.hide();
+        this.reset();
+        selectedRating = 0;
+        updateStars();
+        
+        // Show success message
+        showNotification('Thank you for your feedback! Your email client should open shortly.', 'success');
+    });
+    
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
+    }
+});
+</script>
+
+<style>
+.floating-feedback-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: none !important; /* Completely hidden by user request */
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    user-select: none;
+}
+
+.floating-feedback-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.floating-feedback-button .feedback-text {
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 5px;
+    font-size: 1.5rem;
+}
+
+.star {
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star:hover,
+.star.hover {
+    color: #ffc107;
+}
+
+.star.active {
+    color: #ffc107;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .floating-feedback-button {
+        bottom: 15px;
+        right: 15px;
+        padding: 12px 16px;
+    }
+    
+    .floating-feedback-button .feedback-text {
+        display: none;
+    }
+    
+    .floating-feedback-button {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        justify-content: center;
+    }
+}
+
+/* Prevent text selection while dragging */
+.floating-feedback-button.dragging {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+</style>

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Learn More - SierraWings{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="bg-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4 text-dark">About SierraWings</h1>
+                <p class="lead mb-4 text-dark">Discover how our advanced medical drone delivery system is revolutionizing healthcare access across Sierra Leone with cutting edge technology and unwavering commitment to saving lives.</p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-primary">Home</a></li>
+                        <li class="breadcrumb-item active text-dark" aria-current="page">Learn More</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center">
+                    <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="80" fill="#FFC107" opacity="0.3"/>
+                        <rect x="85" y="75" width="30" height="15" fill="#FFC107"/>
+                        <rect x="85" y="110" width="30" height="15" fill="#FFC107"/>
+                        <circle cx="100" cy="100" r="25" fill="#FFC107"/>
+                        <path d="M90 90 L110 90 L110 110 L90 110 Z" fill="white"/>
+                        <path d="M95 95 L105 95 L105 105 L95 105 Z" fill="#FFC107"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <h2 class="mb-4 text-dark">Our Mission</h2>
+                <p class="lead text-dark">To provide immediate, reliable medical supply delivery to every corner of Sierra Leone, ensuring that no patient goes without life saving treatment due to transportation barriers.</p>
+                <p class="text-dark">SierraWings bridges the gap between medical facilities and patients in remote areas, using autonomous drone technology to deliver medications, medical supplies, and emergency treatments within minutes rather than hours.</p>
+                <div class="mt-4">
+                    <h4 class="text-dark">Core Values</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-dark"><i class="fas fa-check-circle text-primary me-2"></i>Accessibility for all patients</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check-circle text-primary me-2"></i>Speed in emergency situations</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check-circle text-primary me-2"></i>Reliability in every delivery</li>
+                        <li class="mb-2 text-dark"><i class="fas fa-check-circle text-primary me-2"></i>Safety first approach</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow bg-white">
+                    <div class="card-body p-4">
+                        <h5 class="card-title text-dark">Quick Facts</h5>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <div class="text-center">
+                                    <h3 class="text-primary">15 km</h3>
+                                    <small class="text-dark">Maximum Range</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="text-center">
+                                    <h3 class="text-primary">2 kg</h3>
+                                    <small class="text-dark">Payload Capacity</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="text-center">
+                                    <h3 class="text-primary">45 min</h3>
+                                    <small class="text-dark">Flight Time</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="text-center">
+                                    <h3 class="text-primary">5°C</h3>
+                                    <small class="text-dark">Temperature Control</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Technology Section -->
+<section class="bg-white py-5">
+    <div class="container">
+        <h2 class="text-center mb-5 text-dark">Advanced Technology</h2>
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow bg-white">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-microchip text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Pixhawk Flight Control</h5>
+                        <p class="card-text text-dark">Advanced flight control systems with GPS precision, obstacle avoidance, and automatic flight path optimization for safe, efficient deliveries.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow bg-white">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-satellite text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Real Time Tracking</h5>
+                        <p class="card-text text-dark">Live GPS tracking with telemetry data, allowing patients and medical staff to monitor deliveries in real time through our web platform.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow bg-white">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-thermometer-half text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title text-dark">Temperature Control</h5>
+                        <p class="card-text text-dark">Climate controlled cargo compartments maintain optimal temperatures for sensitive medications and biological samples during transport.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Process Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 text-dark">How It Works</h2>
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <div class="process-step-detailed text-center">
+                    <div class="step-icon mb-3">
+                        <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">1</span>
+                    </div>
+                    <h5 class="text-dark">Request Submission</h5>
+                    <p class="text-dark">Patients submit delivery requests through our secure web platform, providing medical details and location information.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-4">
+                <div class="process-step-detailed text-center">
+                    <div class="step-icon mb-3">
+                        <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">2</span>
+                    </div>
+                    <h5 class="text-dark">Medical Review</h5>
+                    <p class="text-dark">Licensed healthcare professionals at registered clinics review and approve requests, ensuring medical appropriateness.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-4">
+                <div class="process-step-detailed text-center">
+                    <div class="step-icon mb-3">
+                        <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">3</span>
+                    </div>
+                    <h5 class="text-dark">Drone Dispatch</h5>
+                    <p class="text-dark">Autonomous drones are loaded with medical supplies and dispatched with optimized flight paths for fastest delivery.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 mb-4">
+                <div class="process-step-detailed text-center">
+                    <div class="step-icon mb-3">
+                        <span class="badge bg-primary rounded-circle p-3" style="font-size: 1.5rem;">4</span>
+                    </div>
+                    <h5 class="text-dark">Secure Delivery</h5>
+                    <p class="text-dark">Packages are delivered with identity verification, digital signatures, and photo confirmation for complete security.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Safety Section -->
+<section class="bg-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="mb-4 text-dark">Safety First</h2>
+                <p class="lead mb-4 text-dark">Our comprehensive safety protocols ensure secure delivery of medical supplies with zero compromise on patient safety or data security.</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="text-dark"><i class="fas fa-shield-alt me-2 text-primary"></i>Medical Safety</h5>
+                        <ul class="list-unstyled">
+                            <li class="text-dark">✓ Temperature controlled transport</li>
+                            <li class="text-dark">✓ Sterile packaging protocols</li>
+                            <li class="text-dark">✓ Expiration date tracking</li>
+                            <li class="text-dark">✓ Chain of custody documentation</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="text-dark"><i class="fas fa-lock me-2 text-primary"></i>Data Security</h5>
+                        <ul class="list-unstyled">
+                            <li class="text-dark">✓ End to end encryption</li>
+                            <li class="text-dark">✓ GDPR compliance</li>
+                            <li class="text-dark">✓ Secure authentication</li>
+                            <li class="text-dark">✓ Privacy protection</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="300" height="200" fill="#FFC107" opacity="0.1" rx="10"/>
+                        <circle cx="150" cy="100" r="60" fill="#FFC107" opacity="0.3"/>
+                        <path d="M130 80 L170 80 L170 120 L130 120 Z" fill="#FFC107"/>
+                        <path d="M135 85 L165 85 L165 115 L135 115 Z" fill="white"/>
+                        <path d="M140 90 L160 90 L160 110 L140 110 Z" fill="#FFC107"/>
+                        <text x="150" y="170" text-anchor="middle" font-size="14" font-weight="bold" fill="#FFC107">Secure Transport</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Impact Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Our Impact</h2>
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Communities Served</h5>
+                        <p class="card-text">Reaching remote villages and underserved communities across Sierra Leone, bringing medical care to areas previously difficult to access.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Emergency Response</h5>
+                        <p class="card-text">Reducing emergency medical response times from hours to minutes, potentially saving lives in critical situations.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heartbeat text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h5 class="card-title">Healthcare Access</h5>
+                        <p class="card-text">Improving overall healthcare access by ensuring essential medications and supplies reach patients when needed most.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-light py-5">
+    <div class="container text-center">
+        <h2 class="mb-4">Ready to Experience the Future of Medical Delivery?</h2>
+        <p class="lead mb-4">Join thousands of patients and healthcare providers who trust SierraWings for reliable, fast medical delivery services.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Get Started Today</a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg">Back to Home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

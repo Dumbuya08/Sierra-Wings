@@ -1,0 +1,177 @@
+<!-- Quick Actions - Card Style -->
+<div class="quick-actions-section mb-4">
+    <h5 class="mb-3">
+        <i class="fas fa-bolt me-2"></i>Quick Actions
+    </h5>
+    
+    <div class="quick-actions-grid">
+        <!-- Emergency Request -->
+        <div class="quick-action-card emergency">
+            <div class="card-icon">
+                <i class="fas fa-ambulance"></i>
+            </div>
+            <h5>Emergency Delivery</h5>
+            <p>Request urgent medical supplies with priority delivery</p>
+            <a href="{{ url_for('request_delivery') }}?urgency=emergency" class="btn btn-danger">
+                <i class="fas fa-plus me-2"></i>Request Now
+            </a>
+        </div>
+        
+        <!-- Standard Request -->
+        <div class="quick-action-card routine">
+            <div class="card-icon">
+                <i class="fas fa-box-medical"></i>
+            </div>
+            <h5>Standard Delivery</h5>
+            <p>Request regular medical supplies and medications</p>
+            <a href="{{ url_for('request_delivery') }}?urgency=standard" class="btn btn-success">
+                <i class="fas fa-plus me-2"></i>Request Now
+            </a>
+        </div>
+        
+        <!-- Track Deliveries -->
+        <div class="quick-action-card info">
+            <div class="card-icon">
+                <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <h5>Track Deliveries</h5>
+            <p>Monitor your active deliveries in real-time</p>
+            <a href="{{ url_for('get_missions') }}" class="btn btn-primary">
+                <i class="fas fa-search me-2"></i>Track Now
+            </a>
+        </div>
+        
+        <!-- Find Hospitals -->
+        <div class="quick-action-card info">
+            <div class="card-icon">
+                <i class="fas fa-hospital"></i>
+            </div>
+            <h5>Find Hospitals</h5>
+            <p>Search for nearby hospitals and clinics</p>
+            <a href="{{ url_for('search_hospitals') }}" class="btn btn-info">
+                <i class="fas fa-search me-2"></i>Search Now
+            </a>
+        </div>
+        
+        <!-- Medical History -->
+        <div class="quick-action-card routine">
+            <div class="card-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <h5>Medical History</h5>
+            <p>View your delivery history and records</p>
+            <a href="{{ url_for('get_missions') }}" class="btn btn-outline-primary">
+                <i class="fas fa-list me-2"></i>View History
+            </a>
+        </div>
+        
+        <!-- Get Support -->
+        <div class="quick-action-card emergency">
+            <div class="card-icon">
+                <i class="fas fa-life-ring"></i>
+            </div>
+            <h5>Get Support</h5>
+            <p>Contact support team for assistance</p>
+            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#supportModal">
+                <i class="fas fa-headset me-2"></i>Get Help
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.quick-action-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #3498db;
+    transition: transform 0.3s ease;
+}
+
+.quick-action-card:hover .card-icon {
+    transform: scale(1.1);
+}
+
+.quick-action-card h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.quick-action-card p {
+    color: #546e7a;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.quick-action-card .btn {
+    width: 100%;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.quick-action-card.emergency {
+    border-left: 4px solid #e74c3c;
+}
+
+.quick-action-card.emergency .card-icon {
+    color: #e74c3c;
+}
+
+.quick-action-card.routine {
+    border-left: 4px solid #27ae60;
+}
+
+.quick-action-card.routine .card-icon {
+    color: #27ae60;
+}
+
+.quick-action-card.info {
+    border-left: 4px solid #3498db;
+}
+
+.quick-action-card.info .card-icon {
+    color: #3498db;
+}
+
+@media (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .quick-action-card {
+        padding: 1rem;
+    }
+    
+    .quick-action-card .card-icon {
+        font-size: 2rem;
+    }
+}
+</style>

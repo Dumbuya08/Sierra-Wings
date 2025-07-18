@@ -1,0 +1,115 @@
+<!-- Professional Quick Actions Component -->
+<div class="quick-action-container">
+    {% if current_user.role == 'patient' %}
+        <a href="{{ url_for('request_delivery') }}" class="quick-action-btn request-delivery-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Request Delivery</div>
+                <div class="quick-action-btn-description">Request emergency medical supplies or medications</div>
+            </div>
+        </a>
+        <a href="{{ url_for('get_missions') }}" class="quick-action-btn track-delivery-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-map"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Track Deliveries</div>
+                <div class="quick-action-btn-description">Monitor your active deliveries in real time</div>
+            </div>
+        </a>
+        <a href="{{ url_for('get_missions') }}" class="quick-action-btn view-history-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-history"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Delivery History</div>
+                <div class="quick-action-btn-description">View all your previous delivery requests</div>
+            </div>
+        </a>
+        <a href="{{ url_for('feedback') }}" class="quick-action-btn feedback-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-comment"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Feedback</div>
+                <div class="quick-action-btn-description">Share your experience or report issues</div>
+            </div>
+        </a>
+    {% elif current_user.role == 'clinic' %}
+        <a href="{{ url_for('manage_missions') }}" class="quick-action-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Manage Missions</div>
+                <div class="quick-action-btn-description">Review and accept delivery requests</div>
+            </div>
+        </a>
+        <a href="{{ url_for('live_tracking') }}" class="quick-action-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-map"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Live Tracking</div>
+                <div class="quick-action-btn-description">Track all active deliveries in real time</div>
+            </div>
+        </a>
+        <a href="{{ url_for('patient_records') }}" class="quick-action-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Patient Records</div>
+                <div class="quick-action-btn-description">Manage patient information and medical records</div>
+            </div>
+        </a>
+        <a href="{{ url_for('profile') }}" class="quick-action-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-hospital"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Clinic Profile</div>
+                <div class="quick-action-btn-description">Update clinic information and settings</div>
+            </div>
+        </a>
+    {% elif current_user.role == 'admin' %}
+        <a href="{{ url_for('manage_users') }}" class="quick-action-btn user-management-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">User Management</div>
+                <div class="quick-action-btn-description">Manage all registered users and permissions</div>
+            </div>
+        </a>
+        <a href="{{ url_for('manage_drones') }}" class="quick-action-btn drone-management-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-drone"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Drone Management</div>
+                <div class="quick-action-btn-description">Monitor drone fleet and manage operations</div>
+            </div>
+        </a>
+        <a href="{{ url_for('maintenance_alerts') }}" class="quick-action-btn maintenance-alert-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">Maintenance Alerts</div>
+                <div class="quick-action-btn-description">Send system maintenance notifications</div>
+            </div>
+        </a>
+        <a href="{{ url_for('system_settings') }}" class="quick-action-btn">
+            <div class="quick-action-btn-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="quick-action-btn-content">
+                <div class="quick-action-btn-title">System Settings</div>
+                <div class="quick-action-btn-description">Configure system wide settings and preferences</div>
+            </div>
+        </a>
+    {% endif %}
+</div>

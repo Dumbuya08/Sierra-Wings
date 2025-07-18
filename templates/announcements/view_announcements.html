@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Updates & Announcements - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="text-primary">
+                    <i class="fas fa-bullhorn me-2"></i>
+                    Updates & Announcements
+                </h2>
+                <span class="badge bg-primary badge-pill" id="unread-count">
+                    <!-- Will be populated by JavaScript -->
+                </span>
+            </div>
+
+            <div class="announcement-panel">
+                {% if announcements %}
+                    <div class="announcement-list">
+                        {% for announcement in announcements %}
+                            <div class="announcement-item {% if announcement.priority == 'urgent' %}urgent{% elif announcement.priority == 'high' %}high{% endif %}" 
+                                 data-announcement-id="{{ announcement.id }}">
+                                <div class="announcement-header">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="announcement-title">
+                                                <i class="fas fa-{{ 'exclamation-triangle' if announcement.announcement_type == 'alert' else 'info-circle' if announcement.announcement_type == 'update' else 'tools' if announcement.announcement_type == 'maintenance' else 'bullhorn' }} me-2"></i>
+                                                {{ announcement.title }}
+                                            </h5>
+                                            <div class="announcement-meta">
+                                                <span class="badge bg-{{ 'danger' if announcement.priority == 'urgent' else 'warning' if announcement.priority == 'high' else 'info' if announcement.priority == 'normal' else 'secondary' }}">
+                                                    {{ announcement.priority.title() }}
+                                                </span>
+                                                <span class="badge bg-secondary ms-2">
+                                                    {{ announcement.announcement_type.title() }}
+                                                </span>
+                                                <small class="text-muted ms-2">
+                                                    {{ announcement.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <button class="btn btn-sm btn-outline-secondary dismiss-btn" 
+                                                onclick="dismissAnnouncement({{ announcement.id }})">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="announcement-body">
+                                    <p>{{ announcement.message|safe }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">No announcements</h4>
+                        <p class="text-muted">You're all caught up! Check back later for updates.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('patient_dashboard') if current_user.role == 'patient' else url_for('hospital.dashboard') }}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.announcement-panel {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.announcement-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.announcement-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.announcement-item.urgent {
+    border-left-color: #e74c3c;
+    background: linear-gradient(135deg, #fff5f5, #fff);
+}
+
+.announcement-item.high {
+    border-left-color: #f39c12;
+    background: linear-gradient(135deg, #fffbf5, #fff);
+}
+
+.announcement-title {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.announcement-meta {
+    margin-bottom: 1rem;
+}
+
+.announcement-body {
+    color: #546e7a;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.dismiss-btn {
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    padding: 0.25rem 0.5rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.dismiss-btn:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+#unread-count {
+    font-size: 0.9rem;
+    min-width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.announcement-list {
+    max-height: 80vh;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.announcement-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.announcement-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.announcement-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.announcement-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
+
+<script>
+function dismissAnnouncement(announcementId) {
+    fetch(`/announcements/${announcementId}/dismiss`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove the announcement from the DOM
+            const announcementElement = document.querySelector(`[data-announcement-id="${announcementId}"]`);
+            if (announcementElement) {
+                announcementElement.style.transition = 'opacity 0.3s ease';
+                announcementElement.style.opacity = '0';
+                setTimeout(() => {
+                    announcementElement.remove();
+                    updateUnreadCount();
+                }, 300);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error dismissing announcement:', error);
+    });
+}
+
+function updateUnreadCount() {
+    fetch('/api/announcements/count')
+        .then(response => response.json())
+        .then(data => {
+            const unreadCountElement = document.getElementById('unread-count');
+            if (unreadCountElement) {
+                unreadCountElement.textContent = data.unread_count;
+                unreadCountElement.style.display = data.unread_count > 0 ? 'flex' : 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error updating unread count:', error);
+        });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateUnreadCount();
+});
+</script>
+{% endblock %}

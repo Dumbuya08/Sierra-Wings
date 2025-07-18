@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}File Data Protection Complaint - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h1 class="display-6 fw-bold text-dark">File Data Protection Complaint</h1>
+                        <p class="text-muted">Report concerns about your data privacy and protection</p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Your Rights:</strong> You have the right to file complaints about data protection violations with relevant regulatory authorities.
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Sierra Leone Data Protection Authority</h5>
+                        <p>If you believe your data protection rights have been violated, you can file a complaint with the Sierra Leone Data Protection Authority.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Contact Information:</h6>
+                                <p>
+                                    <i class="fas fa-envelope me-2"></i>Email: complaints@dataprotection.sl<br>
+                                    <i class="fas fa-phone me-2"></i>Phone: +232 22 227 610<br>
+                                    <i class="fas fa-map-marker-alt me-2"></i>Address: Tower Hill, Freetown, Sierra Leone
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Required Information:</h6>
+                                <ul>
+                                    <li>Your full name and contact details</li>
+                                    <li>Description of the data protection concern</li>
+                                    <li>Evidence or documentation</li>
+                                    <li>Steps taken to resolve the issue</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>International Data Protection Authorities</h5>
+                        <p>For cross border data processing issues, you may also contact:</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>European Union</h6>
+                                <p>
+                                    <strong>European Data Protection Board</strong><br>
+                                    Website: <a href="https://edpb.europa.eu" target="_blank">edpb.europa.eu</a><br>
+                                    For GDPR related complaints
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>United Kingdom</h6>
+                                <p>
+                                    <strong>Information Commissioner's Office (ICO)</strong><br>
+                                    Website: <a href="https://ico.org.uk" target="_blank">ico.org.uk</a><br>
+                                    Phone: +44 0303 123 1113
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Before Filing a Complaint</h5>
+                        <p>We encourage you to first contact our support team to resolve any data protection concerns:</p>
+                        
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Contact SierraWings Support:</strong><br>
+                            Email: privacy@sierrawings.com<br>
+                            Phone: +232 30 700 479<br>
+                            Response time: Within 48 hours
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Your Data Protection Rights</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Right to access your personal data</li>
+                                    <li>Right to correct inaccurate data</li>
+                                    <li>Right to delete your data</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul>
+                                    <li>Right to data portability</li>
+                                    <li>Right to object to processing</li>
+                                    <li>Right to withdraw consent</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{{ url_for('data_privacy') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Privacy Rights
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

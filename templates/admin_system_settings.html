@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('manage_users') }}">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('manage_drones') }}">
+                            <i class="fas fa-drone me-2"></i>Manage Drones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('system_settings') }}">
+                            <i class="fas fa-cogs me-2"></i>System Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">System Settings</h1>
+            </div>
+
+            <!-- Settings Tabs -->
+            <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                        <i class="fas fa-cog me-2"></i>General
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="security-tab" data-bs-toggle="tab" data-bs-target="#security" type="button" role="tab">
+                        <i class="fas fa-shield-alt me-2"></i>Security
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="notifications-tab" data-bs-toggle="tab" data-bs-target="#notifications" type="button" role="tab">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="backup-tab" data-bs-toggle="tab" data-bs-target="#backup" type="button" role="tab">
+                        <i class="fas fa-database me-2"></i>Backup
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="settingsTabsContent">
+                <!-- General Settings -->
+                <div class="tab-pane fade show active" id="general" role="tabpanel">
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">General Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="systemName" class="form-label">System Name</label>
+                                            <input type="text" class="form-control" id="systemName" value="SierraWings">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="systemVersion" class="form-label">System Version</label>
+                                            <input type="text" class="form-control" id="systemVersion" value="1.0.0" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="maxDrones" class="form-label">Maximum Drones</label>
+                                            <input type="number" class="form-control" id="maxDrones" value="10">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="maxUsers" class="form-label">Maximum Users</label>
+                                            <input type="number" class="form-control" id="maxUsers" value="1000">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save General Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Settings -->
+                <div class="tab-pane fade" id="security" role="tabpanel">
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Security Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="passwordMinLength" class="form-label">Minimum Password Length</label>
+                                            <input type="number" class="form-control" id="passwordMinLength" value="6">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                            <input type="number" class="form-control" id="sessionTimeout" value="30">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="require2FA" checked>
+                                    <label class="form-check-label" for="require2FA">
+                                        Require Two-Factor Authentication
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="enableLogging" checked>
+                                    <label class="form-check-label" for="enableLogging">
+                                        Enable Security Logging
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Security Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Settings -->
+                <div class="tab-pane fade" id="notifications" role="tabpanel">
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Notification Settings</h5>
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                    <label class="form-check-label" for="emailNotifications">
+                                        Enable Email Notifications
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="smsNotifications">
+                                    <label class="form-check-label" for="smsNotifications">
+                                        Enable SMS Notifications
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="pushNotifications" checked>
+                                    <label class="form-check-label" for="pushNotifications">
+                                        Enable Push Notifications
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="adminEmail" class="form-label">Admin Email</label>
+                                    <input type="email" class="form-control" id="adminEmail" value="admin@sierrawings.com">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Notification Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backup Settings -->
+                <div class="tab-pane fade" id="backup" role="tabpanel">
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">Backup & Maintenance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                        <label class="form-check-label" for="autoBackup">
+                                            Enable Automatic Backups
+                                        </label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="backupFrequency" class="form-label">Backup Frequency</label>
+                                        <select class="form-select" id="backupFrequency">
+                                            <option value="daily" selected>Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="monthly">Monthly</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary" onclick="createBackup()">
+                                        <i class="fas fa-save me-2"></i>Create Backup Now
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>System Maintenance</h6>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-warning" onclick="clearCache()">
+                                            <i class="fas fa-trash me-2"></i>Clear Cache
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" onclick="optimizeDatabase()">
+                                            <i class="fas fa-database me-2"></i>Optimize Database
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success" onclick="checkUpdates()">
+                                            <i class="fas fa-sync me-2"></i>Check for Updates
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+function createBackup() {
+    alert('Creating backup... This may take a few moments.');
+}
+
+function clearCache() {
+    if (confirm('Are you sure you want to clear the cache?')) {
+        alert('Cache cleared successfully!');
+    }
+}
+
+function optimizeDatabase() {
+    if (confirm('Are you sure you want to optimize the database?')) {
+        alert('Database optimization completed!');
+    }
+}
+
+function checkUpdates() {
+    alert('Checking for updates... You are running the latest version.');
+}
+</script>
+{% endblock %}

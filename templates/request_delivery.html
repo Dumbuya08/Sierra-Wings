@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Request Delivery - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">Request Medical Delivery</h2>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="medical_items" class="form-label">Medical Items Needed *</label>
+                            <select class="form-select" id="medical_items_dropdown" onchange="updateMedicalItems()">
+                                <option value="">Select medical items</option>
+                                <option value="Pain relievers (Paracetamol, Ibuprofen)">Pain relievers (Paracetamol, Ibuprofen)</option>
+                                <option value="Antibiotics (Amoxicillin, Ciprofloxacin)">Antibiotics (Amoxicillin, Ciprofloxacin)</option>
+                                <option value="Antimalaria medications (Artemether, Coartem)">Antimalaria medications (Artemether, Coartem)</option>
+                                <option value="Insulin and diabetes supplies">Insulin and diabetes supplies</option>
+                                <option value="Blood pressure medications">Blood pressure medications</option>
+                                <option value="Asthma inhalers">Asthma inhalers</option>
+                                <option value="Bandages and wound care supplies">Bandages and wound care supplies</option>
+                                <option value="Syringes and needles">Syringes and needles</option>
+                                <option value="Thermometer">Thermometer</option>
+                                <option value="Blood glucose test strips">Blood glucose test strips</option>
+                                <option value="Pregnancy test kits">Pregnancy test kits</option>
+                                <option value="Oral rehydration salts (ORS)">Oral rehydration salts (ORS)</option>
+                                <option value="Antiseptic solutions">Antiseptic solutions</option>
+                                <option value="Eye drops">Eye drops</option>
+                                <option value="Contraceptives">Contraceptives</option>
+                                <option value="Emergency medications">Emergency medications</option>
+                                <option value="Surgical supplies">Surgical supplies</option>
+                                <option value="IV fluids and equipment">IV fluids and equipment</option>
+                                <option value="Oxygen equipment">Oxygen equipment</option>
+                                <option value="Custom/Other">Custom/Other (specify below)</option>
+                            </select>
+                            <textarea class="form-control mt-2" id="medical_items" name="medical_items" rows="3" required placeholder="Selected items will appear here. Add any additional details or custom items..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="urgency_level" class="form-label">Urgency Level *</label>
+                            <select class="form-select" id="urgency_level" name="urgency_level" required>
+                                <option value="standard">Standard (1-2 hours)</option>
+                                <option value="urgent">Urgent (30-60 minutes)</option>
+                                <option value="emergency">Emergency (15-30 minutes)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="delivery_address" class="form-label">Delivery Address *</label>
+                            <div class="input-group mb-2">
+                                <textarea class="form-control" id="delivery_address" name="delivery_address" rows="3" required placeholder="Enter complete delivery address including landmarks..."></textarea>
+                                <button class="btn btn-outline-primary" type="button" id="useLocationBtn" onclick="useCurrentLocation()">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Use Current Location
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Click "Use Current Location" to automatically fill your GPS coordinates
+                            </small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="contact_phone" class="form-label">Contact Phone *</label>
+                            <input type="tel" class="form-control" id="contact_phone" name="contact_phone" required placeholder="+232 XX XXX XXXX">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="delivery_notes" class="form-label">Additional Notes (Optional)</label>
+                            <textarea class="form-control" id="delivery_notes" name="delivery_notes" rows="2" placeholder="Any special instructions or additional information (optional)..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Submit Request</button>
+                            <a href="{{ url_for('patient_dashboard') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateMedicalItems() {
+    const dropdown = document.getElementById('medical_items_dropdown');
+    const textarea = document.getElementById('medical_items');
+    
+    if (dropdown.value && dropdown.value !== 'Custom/Other') {
+        // Add the selected item to the textarea
+        const currentText = textarea.value;
+        const newItem = dropdown.value;
+        
+        if (currentText.includes(newItem)) {
+            // Item already exists, don't add again
+            return;
+        }
+        
+        if (currentText.trim() === '') {
+            textarea.value = newItem;
+        } else {
+            textarea.value = currentText + '\n' + newItem;
+        }
+    }
+    
+    // Reset dropdown
+    dropdown.selectedIndex = 0;
+}
+
+function useCurrentLocation() {
+    const addressField = document.getElementById('delivery_address');
+    const button = document.getElementById('useLocationBtn');
+    
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported by this browser.');
+        return;
+    }
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Getting Location...';
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const accuracy = position.coords.accuracy;
+            
+            // Use reverse geocoding to get address
+            reverseGeocode(lat, lon, accuracy, addressField, button);
+        },
+        function(error) {
+            let errorMessage = 'Unable to get location: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += 'Location access denied by user.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Location information is unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += 'Location request timed out.';
+                    break;
+                default:
+                    errorMessage += 'An unknown error occurred.';
+                    break;
+            }
+            alert(errorMessage);
+            
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>Use Current Location';
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 300000
+        }
+    );
+}
+
+function reverseGeocode(lat, lon, accuracy, addressField, button) {
+    // Use OpenStreetMap Nominatim for reverse geocoding
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.display_name) {
+                const address = `${data.display_name}\n\nGPS Coordinates: ${lat.toFixed(6)}, ${lon.toFixed(6)}\nAccuracy: ${accuracy}m`;
+                addressField.value = address;
+            } else {
+                // Fallback to coordinates only
+                const address = `GPS Coordinates: ${lat.toFixed(6)}, ${lon.toFixed(6)}\nAccuracy: ${accuracy}m\n\nPlease add landmark details manually.`;
+                addressField.value = address;
+            }
+        })
+        .catch(error => {
+            console.error('Reverse geocoding failed:', error);
+            // Fallback to coordinates only
+            const address = `GPS Coordinates: ${lat.toFixed(6)}, ${lon.toFixed(6)}\nAccuracy: ${accuracy}m\n\nPlease add landmark details manually.`;
+            addressField.value = address;
+        })
+        .finally(() => {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-map-marker-alt me-1"></i>Use Current Location';
+        });
+}
+
+// Pre-fill urgency level if passed in URL
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const urgency = urlParams.get('urgency');
+    if (urgency) {
+        document.getElementById('urgency_level').value = urgency;
+    }
+});
+</script>
+{% endblock %}

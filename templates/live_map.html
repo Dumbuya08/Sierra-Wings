@@ -1,0 +1,400 @@
+<!-- Live Real-time Map -->
+<div class="live-map-container">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-map-marked-alt me-2"></i>Live Drone Tracking
+            </h5>
+            <div class="map-controls">
+                <button class="btn btn-sm btn-outline-primary" onclick="refreshMap()">
+                    <i class="fas fa-sync"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleFullscreen()">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div id="liveMap" style="height: 400px; width: 100%;"></div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col-md-6">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Last updated: <span id="lastUpdated">--:--</span>
+                    </small>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="map-legend">
+                        <span class="legend-item">
+                            <i class="fas fa-circle text-success"></i> Active Drones
+                        </span>
+                        <span class="legend-item">
+                            <i class="fas fa-circle text-warning"></i> Standby
+                        </span>
+                        <span class="legend-item">
+                            <i class="fas fa-circle text-danger"></i> Offline
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let liveMap;
+let droneMarkers = {};
+let userLocationMarker;
+let isFullscreen = false;
+
+function initializeLiveMap() {
+    // Initialize the map centered on Sierra Leone
+    liveMap = L.map('liveMap').setView([8.4606, -11.7799], 10);
+    
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(liveMap);
+    
+    // Add user location if available
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Add user location marker
+                userLocationMarker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        html: '<i class="fas fa-user-circle" style="color: #007bff; font-size: 20px;"></i>',
+                        iconSize: [30, 30],
+                        className: 'user-marker'
+                    })
+                }).addTo(liveMap);
+                
+                userLocationMarker.bindPopup('Your Location').openPopup();
+                
+                // Center map on user location
+                liveMap.setView([lat, lon], 12);
+            },
+            function(error) {
+                console.log('Geolocation error:', error);
+                // Continue with default Sierra Leone view
+            }
+        );
+    }
+    
+    // Load initial drone positions
+    loadDronePositions();
+    
+    // Set up auto-refresh every 30 seconds
+    setInterval(loadDronePositions, 30000);
+}
+
+function loadDronePositions() {
+    fetch('/api/live-drones')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateDroneMarkers(data.drones);
+                updateLastUpdated();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading drone positions:', error);
+            // Load simulated drone positions as fallback
+            loadSimulatedDrones();
+        });
+}
+
+function loadSimulatedDrones() {
+    // Simulated drone positions around Sierra Leone
+    const simulatedDrones = [
+        {
+            id: 'SW-001',
+            lat: 8.4606,
+            lon: -11.7799,
+            status: 'active',
+            altitude: 150,
+            battery: 85,
+            mission: 'Emergency delivery to Freetown General Hospital'
+        },
+        {
+            id: 'SW-002',
+            lat: 8.4900,
+            lon: -11.7500,
+            status: 'standby',
+            altitude: 0,
+            battery: 95,
+            mission: 'Awaiting assignment'
+        },
+        {
+            id: 'SW-003',
+            lat: 8.4300,
+            lon: -11.8000,
+            status: 'active',
+            altitude: 200,
+            battery: 72,
+            mission: 'Medication delivery to Kissy clinic'
+        },
+        {
+            id: 'SW-004',
+            lat: 8.5000,
+            lon: -11.7200,
+            status: 'offline',
+            altitude: 0,
+            battery: 0,
+            mission: 'Maintenance required'
+        }
+    ];
+    
+    updateDroneMarkers(simulatedDrones);
+    updateLastUpdated();
+}
+
+function updateDroneMarkers(drones) {
+    // Clear existing markers
+    Object.values(droneMarkers).forEach(marker => {
+        liveMap.removeLayer(marker);
+    });
+    droneMarkers = {};
+    
+    // Add new markers
+    drones.forEach(drone => {
+        const color = getDroneColor(drone.status);
+        const icon = L.divIcon({
+            html: `<i class="fas fa-drone" style="color: ${color}; font-size: 20px;"></i>`,
+            iconSize: [30, 30],
+            className: 'drone-marker'
+        });
+        
+        const marker = L.marker([drone.lat, drone.lon], { icon }).addTo(liveMap);
+        
+        // Create popup content
+        const popupContent = `
+            <div class="drone-popup">
+                <h6>${drone.id}</h6>
+                <p><strong>Status:</strong> <span class="badge bg-${getStatusColor(drone.status)}">${drone.status}</span></p>
+                <p><strong>Altitude:</strong> ${drone.altitude}m</p>
+                <p><strong>Battery:</strong> ${drone.battery}%</p>
+                <p><strong>Mission:</strong> ${drone.mission}</p>
+                <div class="drone-actions">
+                    <button class="btn btn-sm btn-primary" onclick="trackDrone('${drone.id}')">Track</button>
+                    <button class="btn btn-sm btn-info" onclick="getDroneDetails('${drone.id}')">Details</button>
+                </div>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        droneMarkers[drone.id] = marker;
+    });
+}
+
+function getDroneColor(status) {
+    switch(status) {
+        case 'active': return '#28a745';
+        case 'standby': return '#ffc107';
+        case 'offline': return '#dc3545';
+        default: return '#6c757d';
+    }
+}
+
+function getStatusColor(status) {
+    switch(status) {
+        case 'active': return 'success';
+        case 'standby': return 'warning';
+        case 'offline': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function trackDrone(droneId) {
+    const marker = droneMarkers[droneId];
+    if (marker) {
+        liveMap.setView(marker.getLatLng(), 15);
+        marker.openPopup();
+    }
+}
+
+function getDroneDetails(droneId) {
+    fetch(`/api/drone/${droneId}/details`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showDroneDetailsModal(data.drone);
+            } else {
+                alert('Unable to fetch drone details');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching drone details:', error);
+            alert('Error fetching drone details');
+        });
+}
+
+function showDroneDetailsModal(drone) {
+    // Create a modal with detailed drone information
+    const modalHtml = `
+        <div class="modal fade" id="droneDetailsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Drone Details - ${drone.id}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Current Status</h6>
+                                <p><strong>Status:</strong> ${drone.status}</p>
+                                <p><strong>Battery:</strong> ${drone.battery}%</p>
+                                <p><strong>Altitude:</strong> ${drone.altitude}m</p>
+                                <p><strong>Speed:</strong> ${drone.speed || 0} km/h</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Mission Info</h6>
+                                <p><strong>Current Mission:</strong> ${drone.mission}</p>
+                                <p><strong>ETA:</strong> ${drone.eta || 'N/A'}</p>
+                                <p><strong>Distance:</strong> ${drone.distance || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('droneDetailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add new modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('droneDetailsModal'));
+    modal.show();
+}
+
+function refreshMap() {
+    loadDronePositions();
+}
+
+function toggleFullscreen() {
+    const mapContainer = document.querySelector('.live-map-container');
+    const button = document.querySelector('.fa-expand');
+    
+    if (!isFullscreen) {
+        mapContainer.style.position = 'fixed';
+        mapContainer.style.top = '0';
+        mapContainer.style.left = '0';
+        mapContainer.style.width = '100vw';
+        mapContainer.style.height = '100vh';
+        mapContainer.style.zIndex = '9999';
+        mapContainer.style.background = 'white';
+        
+        document.getElementById('liveMap').style.height = 'calc(100vh - 120px)';
+        button.className = 'fas fa-compress';
+        isFullscreen = true;
+    } else {
+        mapContainer.style.position = 'static';
+        mapContainer.style.width = 'auto';
+        mapContainer.style.height = 'auto';
+        mapContainer.style.zIndex = 'auto';
+        mapContainer.style.background = 'transparent';
+        
+        document.getElementById('liveMap').style.height = '400px';
+        button.className = 'fas fa-expand';
+        isFullscreen = false;
+    }
+    
+    // Refresh map size
+    setTimeout(() => {
+        liveMap.invalidateSize();
+    }, 100);
+}
+
+function updateLastUpdated() {
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent = now.toLocaleTimeString();
+}
+
+// Initialize map when document is ready
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof L !== 'undefined') {
+        initializeLiveMap();
+    } else {
+        console.error('Leaflet library not loaded');
+    }
+});
+</script>
+
+<style>
+.live-map-container {
+    margin-bottom: 2rem;
+}
+
+.map-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.drone-marker {
+    background: none;
+    border: none;
+}
+
+.user-marker {
+    background: none;
+    border: none;
+}
+
+.drone-popup {
+    min-width: 200px;
+}
+
+.drone-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.legend-item {
+    margin-left: 1rem;
+    font-size: 0.8rem;
+}
+
+.legend-item:first-child {
+    margin-left: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .map-controls {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .card-footer .row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .card-footer .text-end {
+        text-align: left !important;
+    }
+    
+    .legend-item {
+        display: block;
+        margin-left: 0;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>

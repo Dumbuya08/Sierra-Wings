@@ -1,0 +1,419 @@
+<!-- Drone Wireless Connection Component -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-wifi"></i> Drone Wireless Connection
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Connection Status</h6>
+                <div id="connection-status" class="mb-3">
+                    <span class="badge bg-secondary">
+                        <i class="fas fa-circle"></i> Disconnected
+                    </span>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="drone-select" class="form-label">Select Drone</label>
+                    <select id="drone-select" class="form-select">
+                        <option value="">Select a drone...</option>
+                        {% for drone in available_drones %}
+                        <option value="{{ drone.id }}">{{ drone.name }} ({{ drone.serial_number }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="drone-ip" class="form-label">Drone IP Address</label>
+                    <input type="text" id="drone-ip" class="form-control" placeholder="192.168.1.100" value="192.168.1.100">
+                    <small class="text-muted">IP address of the drone's Raspberry Pi</small>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex">
+                    <button id="connect-btn" class="btn btn-primary">
+                        <i class="fas fa-link"></i> Connect
+                    </button>
+                    <button id="disconnect-btn" class="btn btn-danger" disabled>
+                        <i class="fas fa-unlink"></i> Disconnect
+                    </button>
+                    <button id="ping-btn" class="btn btn-outline-secondary" disabled>
+                        <i class="fas fa-satellite-dish"></i> Ping
+                    </button>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h6>Drone Status</h6>
+                <div id="drone-status-info">
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">Battery Level</small>
+                            <div id="battery-level">--</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Flight Mode</small>
+                            <div id="flight-mode">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-6">
+                            <small class="text-muted">Armed Status</small>
+                            <div id="armed-status">--</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">GPS Status</small>
+                            <div id="gps-status">--</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-2">
+                        <div class="col-12">
+                            <small class="text-muted">Last Update</small>
+                            <div id="last-update">--</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6>Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <button id="get-gps-btn" class="btn btn-outline-primary btn-sm" disabled>
+                            <i class="fas fa-map-marker-alt"></i> Get GPS Location
+                        </button>
+                        <button id="health-check-btn" class="btn btn-outline-info btn-sm" disabled>
+                            <i class="fas fa-heartbeat"></i> Health Check
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Connection Log -->
+        <div class="mt-4">
+            <h6>Connection Log</h6>
+            <div id="connection-log" class="border rounded p-3" style="height: 150px; overflow-y: auto; background-color: #f8f9fa;">
+                <small class="text-muted">Connection log will appear here...</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+class DroneWirelessManager {
+    constructor() {
+        this.socket = io();
+        this.currentDroneId = null;
+        this.connectionStatus = 'disconnected';
+        this.setupEventHandlers();
+        this.setupWebSocketHandlers();
+    }
+    
+    setupEventHandlers() {
+        // Connect button
+        document.getElementById('connect-btn').addEventListener('click', () => {
+            this.connectToDrone();
+        });
+        
+        // Disconnect button
+        document.getElementById('disconnect-btn').addEventListener('click', () => {
+            this.disconnectFromDrone();
+        });
+        
+        // Ping button
+        document.getElementById('ping-btn').addEventListener('click', () => {
+            this.pingDrone();
+        });
+        
+        // Get GPS button
+        document.getElementById('get-gps-btn').addEventListener('click', () => {
+            this.getGPSLocation();
+        });
+        
+        // Health check button
+        document.getElementById('health-check-btn').addEventListener('click', () => {
+            this.performHealthCheck();
+        });
+    }
+    
+    setupWebSocketHandlers() {
+        this.socket.on('drone_connection_status', (data) => {
+            this.handleConnectionStatus(data);
+        });
+        
+        this.socket.on('gps_update', (data) => {
+            this.handleGPSUpdate(data);
+        });
+        
+        this.socket.on('drone_status_update', (data) => {
+            this.handleStatusUpdate(data);
+        });
+        
+        this.socket.on('drone_discovered', (data) => {
+            this.handleDroneDiscovery(data);
+        });
+    }
+    
+    connectToDrone() {
+        const droneSelect = document.getElementById('drone-select');
+        const droneIp = document.getElementById('drone-ip').value;
+        
+        if (!droneSelect.value) {
+            this.addToLog('Please select a drone first', 'error');
+            return;
+        }
+        
+        if (!droneIp) {
+            this.addToLog('Please enter drone IP address', 'error');
+            return;
+        }
+        
+        this.currentDroneId = droneSelect.value;
+        this.addToLog(`Connecting to drone ${this.currentDroneId} at ${droneIp}...`, 'info');
+        
+        // Try WebSocket connection first
+        this.socket.emit('drone_connect', {
+            drone_id: this.currentDroneId,
+            drone_ip: droneIp
+        });
+        
+        // Also try REST API as fallback
+        fetch('/api/drone/connect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                drone_id: this.currentDroneId,
+                drone_ip: droneIp
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'connected') {
+                this.updateConnectionStatus('connected');
+                this.addToLog(`Successfully connected to drone ${this.currentDroneId}`, 'success');
+            } else {
+                this.updateConnectionStatus('failed');
+                this.addToLog(`Failed to connect: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            this.updateConnectionStatus('failed');
+            this.addToLog(`Connection error: ${error.message}`, 'error');
+        });
+    }
+    
+    disconnectFromDrone() {
+        if (!this.currentDroneId) {
+            this.addToLog('No drone connected', 'error');
+            return;
+        }
+        
+        fetch('/api/drone/disconnect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                drone_id: this.currentDroneId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'disconnected') {
+                this.updateConnectionStatus('disconnected');
+                this.addToLog(`Disconnected from drone ${this.currentDroneId}`, 'info');
+                this.currentDroneId = null;
+            }
+        })
+        .catch(error => {
+            this.addToLog(`Disconnect error: ${error.message}`, 'error');
+        });
+    }
+    
+    pingDrone() {
+        if (!this.currentDroneId) {
+            this.addToLog('No drone connected', 'error');
+            return;
+        }
+        
+        const startTime = Date.now();
+        fetch(`/api/drone/ping/${this.currentDroneId}`)
+        .then(response => response.json())
+        .then(data => {
+            const responseTime = Date.now() - startTime;
+            if (data.status === 'ping_success') {
+                this.addToLog(`Ping successful - Response time: ${responseTime}ms`, 'success');
+            } else {
+                this.addToLog(`Ping failed: ${data.error}`, 'error');
+            }
+        })
+        .catch(error => {
+            this.addToLog(`Ping error: ${error.message}`, 'error');
+        });
+    }
+    
+    getGPSLocation() {
+        if (!this.currentDroneId) {
+            this.addToLog('No drone connected', 'error');
+            return;
+        }
+        
+        fetch(`/api/drone/gps/${this.currentDroneId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.lat && data.lon) {
+                this.addToLog(`GPS: ${data.lat.toFixed(6)}, ${data.lon.toFixed(6)}, Alt: ${data.alt}m`, 'info');
+                this.updateGPSStatus('GPS Fix');
+            } else {
+                this.addToLog(`GPS error: ${data.error}`, 'error');
+                this.updateGPSStatus('No GPS');
+            }
+        })
+        .catch(error => {
+            this.addToLog(`GPS error: ${error.message}`, 'error');
+            this.updateGPSStatus('GPS Error');
+        });
+    }
+    
+    performHealthCheck() {
+        if (!this.currentDroneId) {
+            this.addToLog('No drone connected', 'error');
+            return;
+        }
+        
+        fetch(`/api/drone/status/${this.currentDroneId}`)
+        .then(response => response.json())
+        .then(data => {
+            this.updateDroneStatus(data);
+            this.addToLog(`Health check completed`, 'success');
+        })
+        .catch(error => {
+            this.addToLog(`Health check error: ${error.message}`, 'error');
+        });
+    }
+    
+    updateConnectionStatus(status) {
+        this.connectionStatus = status;
+        const statusElement = document.getElementById('connection-status');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const pingBtn = document.getElementById('ping-btn');
+        const getGpsBtn = document.getElementById('get-gps-btn');
+        const healthCheckBtn = document.getElementById('health-check-btn');
+        
+        switch(status) {
+            case 'connected':
+                statusElement.innerHTML = '<span class="badge bg-success"><i class="fas fa-circle"></i> Connected</span>';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                pingBtn.disabled = false;
+                getGpsBtn.disabled = false;
+                healthCheckBtn.disabled = false;
+                break;
+            case 'disconnected':
+                statusElement.innerHTML = '<span class="badge bg-secondary"><i class="fas fa-circle"></i> Disconnected</span>';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                pingBtn.disabled = true;
+                getGpsBtn.disabled = true;
+                healthCheckBtn.disabled = true;
+                break;
+            case 'failed':
+                statusElement.innerHTML = '<span class="badge bg-danger"><i class="fas fa-circle"></i> Connection Failed</span>';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                pingBtn.disabled = true;
+                getGpsBtn.disabled = true;
+                healthCheckBtn.disabled = true;
+                break;
+        }
+    }
+    
+    updateDroneStatus(data) {
+        document.getElementById('battery-level').textContent = data.battery ? `${data.battery}%` : '--';
+        document.getElementById('flight-mode').textContent = data.mode || '--';
+        document.getElementById('armed-status').textContent = data.armed ? 'Armed' : 'Disarmed';
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    }
+    
+    updateGPSStatus(status) {
+        document.getElementById('gps-status').textContent = status;
+    }
+    
+    handleConnectionStatus(data) {
+        if (data.drone_id === this.currentDroneId) {
+            this.updateConnectionStatus(data.status);
+            this.addToLog(`Connection status: ${data.status}`, data.status === 'connected' ? 'success' : 'error');
+        }
+    }
+    
+    handleGPSUpdate(data) {
+        if (data.drone_id === this.currentDroneId) {
+            this.updateGPSStatus('GPS Fix');
+            this.addToLog(`GPS Update: ${data.gps.lat.toFixed(6)}, ${data.gps.lon.toFixed(6)}`, 'info');
+        }
+    }
+    
+    handleStatusUpdate(data) {
+        if (data.drone_id === this.currentDroneId) {
+            this.updateConnectionStatus(data.status);
+        }
+    }
+    
+    handleDroneDiscovery(data) {
+        this.addToLog(`Drone discovered: ${data.drone_id} at ${data.ip}`, 'info');
+        
+        // Add to drone select if not already there
+        const droneSelect = document.getElementById('drone-select');
+        const exists = Array.from(droneSelect.options).some(option => option.value === data.drone_id);
+        if (!exists) {
+            const option = document.createElement('option');
+            option.value = data.drone_id;
+            option.textContent = `${data.drone_id} (${data.ip})`;
+            droneSelect.appendChild(option);
+        }
+    }
+    
+    addToLog(message, type = 'info') {
+        const logElement = document.getElementById('connection-log');
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        
+        let className = 'text-info';
+        let icon = 'fas fa-info-circle';
+        
+        switch(type) {
+            case 'success':
+                className = 'text-success';
+                icon = 'fas fa-check-circle';
+                break;
+            case 'error':
+                className = 'text-danger';
+                icon = 'fas fa-exclamation-circle';
+                break;
+            case 'warning':
+                className = 'text-warning';
+                icon = 'fas fa-exclamation-triangle';
+                break;
+        }
+        
+        logEntry.innerHTML = `
+            <small class="${className}">
+                <i class="${icon}"></i> [${timestamp}] ${message}
+            </small>
+        `;
+        
+        logElement.appendChild(logEntry);
+        logElement.scrollTop = logElement.scrollHeight;
+    }
+}
+
+// Initialize the drone wireless manager when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    window.droneWireless = new DroneWirelessManager();
+});
+</script>

@@ -1,0 +1,130 @@
+<!-- Account Deletion Request Modal -->
+<div class="modal fade" id="accountDeletionModal" tabindex="-1" aria-labelledby="accountDeletionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="accountDeletionModalLabel">
+                    <i class="fas fa-user-times me-2"></i>Request Account Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All your data will be permanently deleted.
+                </div>
+                
+                <div class="mb-3">
+                    <h6>What will be deleted:</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Your profile information</li>
+                        <li class="list-group-item">All delivery history and records</li>
+                        <li class="list-group-item">Payment information and transaction history</li>
+                        <li class="list-group-item">Notification preferences and settings</li>
+                        <li class="list-group-item">All associated medical records (if applicable)</li>
+                    </ul>
+                </div>
+                
+                <form id="accountDeletionForm">
+                    <div class="mb-3">
+                        <label for="deletionReason" class="form-label">Reason for Account Deletion *</label>
+                        <select class="form-select" id="deletionReason" required>
+                            <option value="">Select a reason</option>
+                            <option value="no_longer_needed">No longer need the service</option>
+                            <option value="privacy_concerns">Privacy concerns</option>
+                            <option value="poor_service">Poor service quality</option>
+                            <option value="moving_away">Moving away from service area</option>
+                            <option value="technical_issues">Technical issues</option>
+                            <option value="found_alternative">Found alternative service</option>
+                            <option value="other">Other (please specify)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="otherReasonDiv" style="display: none;">
+                        <label for="otherReason" class="form-label">Please specify your reason</label>
+                        <textarea class="form-control" id="otherReason" rows="3" placeholder="Please provide details..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="deletionFeedback" class="form-label">Additional Feedback (Optional)</label>
+                        <textarea class="form-control" id="deletionFeedback" rows="3" placeholder="Any additional feedback to help us improve our service..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Your Password *</label>
+                        <input type="password" class="form-control" id="confirmPassword" required placeholder="Enter your password to confirm">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDeletion" required>
+                            <label class="form-check-label" for="confirmDeletion">
+                                I understand that this action is permanent and cannot be undone
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="dataExportRequest">
+                            <label class="form-check-label" for="dataExportRequest">
+                                I would like to receive a copy of my data before deletion
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Your deletion request will be reviewed by our admin team. You will receive a confirmation email once the request is processed.
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Submit Deletion Request
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Deletion Status -->
+<div class="account-deletion-status mb-4" id="deletionStatus" style="display: none;">
+    <div class="card border-warning">
+        <div class="card-body">
+            <h6 class="card-title text-warning">
+                <i class="fas fa-clock me-2"></i>Account Deletion Request Pending
+            </h6>
+            <p class="card-text">
+                Your account deletion request is currently being reviewed by our admin team.
+                You will receive an email confirmation once the request is processed.
+            </p>
+            <p class="card-text">
+                <small class="text-muted">Request submitted: <span id="deletionRequestDate"></span></small>
+            </p>
+            <button class="btn btn-outline-warning btn-sm" onclick="cancelDeletionRequest()">
+                <i class="fas fa-times me-1"></i>Cancel Request
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/account-deletion.js') }}"></script>
+
+<style>
+.account-deletion-status {
+    position: sticky;
+    top: 20px;
+    z-index: 100;
+}
+
+@media (max-width: 768px) {
+    .account-deletion-status {
+        position: static;
+    }
+}
+</style>

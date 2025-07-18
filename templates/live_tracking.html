@@ -1,0 +1,419 @@
+{% extends "base.html" %}
+
+{% block title %}Live Tracking - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Live Tracking</h1>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Live Map</h5>
+                </div>
+                <div class="card-body">
+                    <div id="live-map" style="height: 500px;"></div>
+                    <div class="mt-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-user-circle"></i> <strong>Your Location:</strong> <span id="user-location-status">Getting location...</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-success">
+                                    <i class="fas fa-drone"></i> <strong>Nearest Drone:</strong> <span id="nearest-drone-distance">Calculating...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Active Drones</h5>
+                </div>
+                <div class="card-body">
+                    {% if drones %}
+                        {% for drone in drones %}
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                            <div>
+                                <strong>{{ drone.name }}</strong><br>
+                                <small class="text-muted">{{ drone.model }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success">{{ drone.status.title() }}</span><br>
+                                <small class="text-muted">{{ drone.battery_level }}%</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="fas fa-drone fa-2x mb-3"></i>
+                            <p>No drones in flight</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+    let liveMap = null;
+    let userMarker = null;
+    let userLocationCircle = null;
+    let droneMarkers = [];
+    let connectionLines = [];
+    let watchId = null;
+    let currentUserLocation = null;
+    
+    // Initialize live tracking map
+    function initLiveTrackingMap() {
+        // Create map
+        liveMap = L.map('live-map').setView([8.4606, -11.7799], 12);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(liveMap);
+        
+        // Create icons
+        const userIcon = L.divIcon({
+            html: '<i class="fas fa-user-circle text-primary" style="font-size: 20px;"></i>',
+            iconSize: [25, 25],
+            className: 'user-location-marker'
+        });
+        
+        const droneIcon = L.divIcon({
+            html: '<i class="fas fa-drone text-success" style="font-size: 18px;"></i>',
+            iconSize: [25, 25],
+            className: 'drone-marker'
+        });
+        
+        // Get user's real location
+        getUserLocationAndStartTracking(userIcon, droneIcon);
+        
+        // Start real-time updates
+        startRealTimeUpdates();
+    }
+    
+    // Get user location and start tracking
+    function getUserLocationAndStartTracking(userIcon, droneIcon) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    currentUserLocation = { lat, lng };
+                    
+                    // Update map center
+                    liveMap.setView([lat, lng], 15);
+                    
+                    // Add user marker
+                    userMarker = L.marker([lat, lng], { icon: userIcon })
+                        .addTo(liveMap)
+                        .bindPopup(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m`);
+                    
+                    // Add accuracy circle
+                    userLocationCircle = L.circle([lat, lng], {
+                        color: 'blue',
+                        fillColor: '#30f',
+                        fillOpacity: 0.1,
+                        radius: accuracy
+                    }).addTo(liveMap);
+                    
+                    // Update status
+                    document.getElementById('user-location-status').textContent = 
+                        `Located (±${Math.round(accuracy)}m accuracy)`;
+                    
+                    // Load drones and create connections
+                    loadDronesAndCreateConnections(droneIcon);
+                    
+                    // Start watching location
+                    startLocationWatching(userIcon, droneIcon);
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                    document.getElementById('user-location-status').textContent = 
+                        'Location access denied or unavailable';
+                    
+                    // Use default location
+                    currentUserLocation = { lat: 8.4606, lng: -11.7799 };
+                    userMarker = L.marker([8.4606, -11.7799], { icon: userIcon })
+                        .addTo(liveMap)
+                        .bindPopup('<b>Default Location</b><br/>Enable location for accurate tracking');
+                    
+                    loadDronesAndCreateConnections(droneIcon);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        }
+    }
+    
+    // Load drones and create connection lines
+    function loadDronesAndCreateConnections(droneIcon) {
+        fetch('/api/drones/locations')
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing markers and lines
+                droneMarkers.forEach(marker => liveMap.removeLayer(marker));
+                connectionLines.forEach(line => liveMap.removeLayer(line));
+                droneMarkers = [];
+                connectionLines = [];
+                
+                let nearestDistance = Infinity;
+                
+                if (data.drones && data.drones.length > 0) {
+                    data.drones.forEach(drone => {
+                        if (drone.location_lat && drone.location_lon) {
+                            const distance = calculateDistance(
+                                currentUserLocation.lat, currentUserLocation.lng,
+                                drone.location_lat, drone.location_lon
+                            );
+                            
+                            if (distance < nearestDistance) {
+                                nearestDistance = distance;
+                            }
+                            
+                            // Create drone marker
+                            const droneMarker = L.marker([drone.location_lat, drone.location_lon], { 
+                                icon: droneIcon 
+                            })
+                            .addTo(liveMap)
+                            .bindPopup(`
+                                <b>${drone.name}</b><br/>
+                                Status: ${drone.status}<br/>
+                                Battery: ${drone.battery_level || 'N/A'}%<br/>
+                                Distance: ${distance.toFixed(1)} km
+                            `);
+                            
+                            droneMarkers.push(droneMarker);
+                            
+                            // Create connection line
+                            const connectionLine = L.polyline([
+                                [currentUserLocation.lat, currentUserLocation.lng],
+                                [drone.location_lat, drone.location_lon]
+                            ], {
+                                color: '#ffc107',
+                                weight: 2,
+                                opacity: 0.7,
+                                dashArray: '5, 10'
+                            }).addTo(liveMap);
+                            
+                            connectionLines.push(connectionLine);
+                        }
+                    });
+                } else {
+                    // Add sample drones near user location
+                    const sampleDrones = [
+                        { lat: currentUserLocation.lat + 0.01, lng: currentUserLocation.lng + 0.01, name: 'Drone Alpha', status: 'Available', battery: 85 },
+                        { lat: currentUserLocation.lat - 0.01, lng: currentUserLocation.lng + 0.01, name: 'Drone Beta', status: 'In Flight', battery: 72 },
+                        { lat: currentUserLocation.lat + 0.01, lng: currentUserLocation.lng - 0.01, name: 'Drone Gamma', status: 'Charging', battery: 95 }
+                    ];
+                    
+                    sampleDrones.forEach(drone => {
+                        const distance = calculateDistance(
+                            currentUserLocation.lat, currentUserLocation.lng,
+                            drone.lat, drone.lng
+                        );
+                        
+                        if (distance < nearestDistance) {
+                            nearestDistance = distance;
+                        }
+                        
+                        // Create drone marker
+                        const droneMarker = L.marker([drone.lat, drone.lng], { 
+                            icon: droneIcon 
+                        })
+                        .addTo(liveMap)
+                        .bindPopup(`
+                            <b>${drone.name}</b><br/>
+                            Status: ${drone.status}<br/>
+                            Battery: ${drone.battery}%<br/>
+                            Distance: ${distance.toFixed(1)} km
+                        `);
+                        
+                        droneMarkers.push(droneMarker);
+                        
+                        // Create connection line
+                        const connectionLine = L.polyline([
+                            [currentUserLocation.lat, currentUserLocation.lng],
+                            [drone.lat, drone.lng]
+                        ], {
+                            color: '#ffc107',
+                            weight: 2,
+                            opacity: 0.7,
+                            dashArray: '5, 10'
+                        }).addTo(liveMap);
+                        
+                        connectionLines.push(connectionLine);
+                    });
+                }
+                
+                // Update nearest drone distance
+                if (nearestDistance !== Infinity) {
+                    document.getElementById('nearest-drone-distance').textContent = 
+                        `${nearestDistance.toFixed(1)} km away`;
+                }
+            })
+            .catch(error => {
+                console.error('Error loading drones:', error);
+                document.getElementById('nearest-drone-distance').textContent = 'Error loading drone data';
+            });
+    }
+    
+    // Start location watching
+    function startLocationWatching(userIcon, droneIcon) {
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    currentUserLocation = { lat, lng };
+                    
+                    // Update user marker
+                    if (userMarker) {
+                        userMarker.setLatLng([lat, lng]);
+                        userMarker.setPopupContent(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m<br/>Updated: ${new Date().toLocaleTimeString()}`);
+                    }
+                    
+                    // Update accuracy circle
+                    if (userLocationCircle) {
+                        userLocationCircle.setLatLng([lat, lng]);
+                        userLocationCircle.setRadius(accuracy);
+                    }
+                    
+                    // Update status
+                    document.getElementById('user-location-status').textContent = 
+                        `Located (±${Math.round(accuracy)}m) - Updated: ${new Date().toLocaleTimeString()}`;
+                    
+                    // Update connection lines
+                    updateConnectionLines();
+                },
+                function(error) {
+                    console.error('Location watching error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 30000,
+                    maximumAge: 60000
+                }
+            );
+        }
+    }
+    
+    // Update connection lines
+    function updateConnectionLines() {
+        connectionLines.forEach((line, index) => {
+            if (droneMarkers[index]) {
+                const droneLatLng = droneMarkers[index].getLatLng();
+                line.setLatLngs([
+                    [currentUserLocation.lat, currentUserLocation.lng],
+                    [droneLatLng.lat, droneLatLng.lng]
+                ]);
+            }
+        });
+    }
+    
+    // Start real-time updates
+    function startRealTimeUpdates() {
+        setInterval(function() {
+            if (currentUserLocation) {
+                fetch('/api/drones/locations')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update drone positions and connection lines
+                        updateDronePositions(data);
+                    })
+                    .catch(error => console.error('Error updating drone positions:', error));
+            }
+        }, 5000); // Update every 5 seconds
+    }
+    
+    // Update drone positions
+    function updateDronePositions(data) {
+        if (data.drones && data.drones.length > 0) {
+            let nearestDistance = Infinity;
+            
+            data.drones.forEach((drone, index) => {
+                if (drone.location_lat && drone.location_lon && droneMarkers[index]) {
+                    const distance = calculateDistance(
+                        currentUserLocation.lat, currentUserLocation.lng,
+                        drone.location_lat, drone.location_lon
+                    );
+                    
+                    if (distance < nearestDistance) {
+                        nearestDistance = distance;
+                    }
+                    
+                    // Update drone marker position
+                    droneMarkers[index].setLatLng([drone.location_lat, drone.location_lon]);
+                    droneMarkers[index].setPopupContent(`
+                        <b>${drone.name}</b><br/>
+                        Status: ${drone.status}<br/>
+                        Battery: ${drone.battery_level || 'N/A'}%<br/>
+                        Distance: ${distance.toFixed(1)} km<br/>
+                        Updated: ${new Date().toLocaleTimeString()}
+                    `);
+                }
+            });
+            
+            // Update nearest drone distance
+            if (nearestDistance !== Infinity) {
+                document.getElementById('nearest-drone-distance').textContent = 
+                    `${nearestDistance.toFixed(1)} km away - Updated: ${new Date().toLocaleTimeString()}`;
+            }
+            
+            // Update connection lines
+            updateConnectionLines();
+        }
+    }
+    
+    // Calculate distance between two points
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initLiveTrackingMap();
+    });
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', function() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+    });
+</script>
+{% endblock %}

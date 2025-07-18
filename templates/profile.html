@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">My Profile</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('settings') }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user"></i> Profile Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Basic Information -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>First Name:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.first_name or 'Not provided' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Last Name:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.last_name or 'Not provided' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Username:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.username }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Email:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.email }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Phone:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.phone or 'Not provided' }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Role:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.role.title() }}
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <strong>Address:</strong>
+                                </div>
+                                <div class="col-md-8">
+                                    {{ user.address or 'Not provided' }}
+                                </div>
+                            </div>
+                        
+                        {% if user.role == 'patient' %}
+                        <!-- Patient-specific fields -->
+                        <hr>
+                        <h6 class="mb-3">
+                            <i class="fas fa-heartbeat"></i> Medical Information
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Medical ID:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.medical_id or 'Not provided' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Emergency Contact:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.emergency_contact or 'Not provided' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Allergies:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.allergies or 'None reported' }}
+                            </div>
+                        </div>
+                        
+                        {% elif user.role == 'clinic' %}
+                        <!-- Clinic-specific fields -->
+                        <hr>
+                        <h6 class="mb-3">
+                            <i class="fas fa-hospital"></i> Clinic Information
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Clinic Name:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.clinic_name or 'Not provided' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>License Number:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.clinic_license or 'Not provided' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Specialization:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.specialization or 'Not provided' }}
+                            </div>
+                        </div>
+                        
+                        {% elif user.role == 'admin' %}
+                        <!-- Admin-specific display -->
+                        <hr>
+                        <h6 class="mb-3">
+                            <i class="fas fa-shield-alt"></i> Administrator Information
+                        </h6>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Account Type:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                System Administrator
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Created:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.created_at.strftime('%B %d, %Y') if user.created_at else 'Not available' }}
+                            </div>
+                        </div>
+                        
+                        {% endif %}
+                        
+                        <hr>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Account Created:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.created_at.strftime('%B %d, %Y at %I:%M %p') if user.created_at else 'Not available' }}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <strong>Last Updated:</strong>
+                            </div>
+                            <div class="col-md-8">
+                                {{ user.updated_at.strftime('%B %d, %Y at %I:%M %p') if user.updated_at else 'Not available' }}
+                            </div>
+                        </div>
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

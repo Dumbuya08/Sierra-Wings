@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SierraWings - Medical Drone Delivery{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/icon-192x192.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/icon-192x192.png') }}">
+    
+    <!-- Meta Tags -->
+    <meta name="description" content="SierraWings - Advanced medical drone delivery platform for emergency medical logistics in Sierra Leone">
+    <meta name="theme-color" content="#1E4A72">
+    <meta name="author" content="SierraWings">
+    <meta name="keywords" content="medical drone, emergency delivery, Sierra Leone, healthcare, medical logistics, hospital management">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SierraWings">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="msapplication-TileColor" content="#1E4A72">
+    <meta name="msapplication-TileImage" content="{{ url_for('static', filename='images/icon-192x192.png') }}">
+    
+    <!-- iOS Splash Screens -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-startup-image" href="{{ url_for('static', filename='images/icon-512x512.png') }}">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Medical Theme CSS -->
+    <link href="{{ url_for('static', filename='css/medical-theme.css') }}" rel="stylesheet">
+    
+    <!-- Professional Button System -->
+    <link href="{{ url_for('static', filename='css/professional-buttons.css') }}" rel="stylesheet">
+    
+    <!-- Hide Feedback Buttons (User Request) -->
+    <link href="{{ url_for('static', filename='css/hide-feedback.css') }}" rel="stylesheet">
+    
+    <!-- Enhanced Features (only on non-auth pages) -->
+    {% if not request.endpoint or request.endpoint not in ['auth.login', 'auth.register', 'auth.verify_email', 'auth.forgot_password', 'auth.reset_password'] %}
+        <link href="{{ url_for('static', filename='css/gamification.css') }}" rel="stylesheet">
+        <script src="{{ url_for('static', filename='js/contextual-help.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/loading-indicators.js') }}"></script>
+    {% endif %}
+    
+    <!-- Maintenance Mode Check -->
+    <script>
+        // Check maintenance mode on page load
+        fetch('/api/maintenance-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.maintenance && data.fullScreen) {
+                    showMaintenanceBanner(data);
+                }
+            })
+            .catch(error => console.log('Maintenance status check failed:', error));
+            
+        function showMaintenanceBanner(data) {
+            const banner = document.getElementById('maintenance-banner');
+            const messageEl = document.getElementById('maintenance-message');
+            const durationEl = document.getElementById('maintenance-duration');
+            const etaEl = document.getElementById('maintenance-eta');
+            const updatesEl = document.getElementById('maintenance-updates');
+            
+            if (banner) {
+                // Update content
+                if (messageEl) messageEl.textContent = data.message;
+                if (durationEl) durationEl.textContent = 'Duration: ' + data.duration;
+                if (etaEl) etaEl.textContent = 'ETA: ' + data.eta;
+                
+                // Update progress
+                if (updatesEl && data.updates) {
+                    updatesEl.innerHTML = '';
+                    data.updates.forEach(update => {
+                        const li = document.createElement('li');
+                        li.className = update.status;
+                        li.textContent = update.text;
+                        updatesEl.appendChild(li);
+                    });
+                }
+                
+                // Show banner
+                banner.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+    </script>
+    
+    <!-- Screen Reader Only Styles -->
+    <style>
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .keyboard-navigation *:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+        
+        /* Social Media Styles */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+        }
+        
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .social-link.facebook:hover { background: #1877f2; }
+        .social-link.twitter:hover { background: #1da1f2; }
+        .social-link.tiktok:hover { background: #000; }
+        .social-link.instagram:hover { background: #e4405f; }
+        
+        .community-highlight {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .feature-card {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px);
+        }
+        
+        /* Maintenance Mode Styles */
+        .maintenance-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .maintenance-content {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .maintenance-icon {
+            font-size: 64px;
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+        
+        .maintenance-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #ffc107;
+        }
+        
+        .maintenance-text p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: #e9ecef;
+        }
+        
+        .maintenance-details {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .maintenance-time, .maintenance-eta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #adb5bd;
+            margin: 10px;
+        }
+        
+        .maintenance-progress h4 {
+            color: #ffc107;
+            margin-bottom: 15px;
+        }
+        
+        .maintenance-progress ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .maintenance-progress li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .maintenance-progress li:last-child {
+            border-bottom: none;
+        }
+        
+        .maintenance-progress li.completed {
+            color: #28a745;
+        }
+        
+        .maintenance-progress li.completed::before {
+            content: "✓ ";
+            font-weight: bold;
+        }
+        
+        .maintenance-progress li.in-progress {
+            color: #ffc107;
+        }
+        
+        .maintenance-progress li.in-progress::before {
+            content: "⏳ ";
+        }
+        
+        .maintenance-progress li.pending {
+            color: #6c757d;
+        }
+        
+        .maintenance-progress li.pending::before {
+            content: "○ ";
+        }
+    </style>
+    
+    {% block head %}{% endblock %}
+</head>
+<body data-user-role="{{ current_user.role if current_user.is_authenticated else 'guest' }}">
+    <!-- Maintenance Mode Banner -->
+    <div id="maintenance-banner" class="maintenance-banner" style="display: none;">
+        <div class="maintenance-content">
+            <div class="maintenance-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="maintenance-text">
+                <h2>System Under Maintenance</h2>
+                <p id="maintenance-message">We're performing scheduled maintenance to improve your experience.</p>
+                <div class="maintenance-details">
+                    <div class="maintenance-time">
+                        <i class="fas fa-clock"></i>
+                        <span id="maintenance-duration">Duration: Approximately 2 hours</span>
+                    </div>
+                    <div class="maintenance-eta">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="maintenance-eta">ETA: --:--</span>
+                    </div>
+                </div>
+                <div class="maintenance-progress">
+                    <h4>Progress Updates:</h4>
+                    <ul id="maintenance-updates">
+                        <li class="completed">Enhanced drone tracking system</li>
+                        <li class="completed">Improved notification delivery</li>
+                        <li class="in-progress">Database optimization</li>
+                        <li class="pending">Security enhancements</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <img src="{{ url_for('static', filename='images/sierrawings-logo.png') }}" alt="SierraWings" class="logo me-2">
+                SierraWings
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-chart-line"></i> Dashboard
+                            </a>
+                        </li>
+                        
+                        {% if current_user.role == 'patient' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('request_delivery') }}">
+                                    <i class="fas fa-ambulance"></i> Request Delivery
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% if current_user.role in ['admin', 'clinic'] %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('live_tracking') }}">
+                                    <i class="fas fa-map-marked-alt"></i> Live Tracking
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'clinic' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('manage_missions') }}">
+                                    <i class="fas fa-clipboard-list"></i> Manage Missions
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% if current_user.role == 'admin' %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-user-shield"></i> Admin
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('user_management') }}">
+                                        <i class="fas fa-users"></i> User Management
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('drone_management') }}">
+                                        <i class="fas fa-drone"></i> Drone Management
+                                    </a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        
+                        {% if current_user.role in ['patient', 'clinic'] %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('feedback') }}">
+                                    <i class="fas fa-comment-medical"></i> Feedback
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-md"></i> {{ current_user.first_name or current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                                    <i class="fas fa-user-circle"></i> Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('settings') }}">
+                                    <i class="fas fa-cog"></i> Settings
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.register') }}">
+                                <i class="fas fa-user-plus"></i> Get Started
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
+    
+    <!-- Main Content -->
+    <main class="container-fluid">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="fas fa-heartbeat me-2"></i>SierraWings</h5>
+                    <p>Emergency medical drone delivery service for Sierra Leone. Reducing hospital paperwork through digital data storage and management.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5><i class="fas fa-phone-alt me-2"></i>Contact Us</h5>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i> 
+                            <a href="tel:+23230700479">+232 30 700 479</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i> 
+                            <a href="tel:+23234994803">+232 34 994 803</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i> 
+                            <a href="mailto:sierrawingsofficial@gmail.com">sierrawingsofficial@gmail.com</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-life-ring"></i> 
+                            <a href="mailto:sierrawingsofficial@gmail.com">Support & Feedback</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            <span>Freetown, Sierra Leone</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h5><i class="fas fa-ambulance me-2"></i>Medical Services</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-heartbeat"></i> Emergency Medical Delivery</li>
+                        <li><i class="fas fa-hospital"></i> Hospital Data Management</li>
+                        <li><i class="fas fa-clipboard-list"></i> Digital Patient Records</li>
+                        <li><i class="fas fa-chart-line"></i> Paperwork Reduction</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2025 SierraWings Medical Services. All rights reserved.</p>
+                <p>
+                    <a href="{{ url_for('terms_of_service') }}" class="me-3">Terms of Service</a>
+                    <a href="{{ url_for('privacy_policy') }}">Privacy Policy</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Toast Notification System -->
+    <script src="{{ url_for('static', filename='js/toast.js') }}"></script>
+    
+    <!-- Medical Theme - No JS needed -->
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Enhanced Features JS (only on non-auth pages) -->
+    {% if not request.endpoint or request.endpoint not in ['auth.login', 'auth.register', 'auth.verify_email', 'auth.forgot_password', 'auth.reset_password'] %}
+        <script src="{{ url_for('static', filename='js/popup-messages.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gamification.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/voice-checklist.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/contextual-help.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/mission-progress.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/emoji-feedback.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/dashboard-widgets.js') }}"></script>
+    {% endif %}
+    
+    <!-- PWA JS -->
+    <script src="{{ url_for('static', filename='js/pwa.js') }}"></script>
+    
+    <!-- Maintenance Mode Checker -->
+    <script src="{{ url_for('static', filename='js/maintenance-checker.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+    
+    <!-- Include Support Modal -->
+    {% include 'support_modal.html' %}
+    
+    <!-- Include Update Panel -->
+    {% if current_user.is_authenticated %}
+        {% include 'update_panel.html' %}
+    {% endif %}
+    
+    <!-- Include Floating Feedback Button -->
+    <script src="{{ url_for('static', filename='js/floating-feedback.js') }}"></script>
+    
+    <!-- Include Feedback System -->
+    <script src="{{ url_for('static', filename='js/feedback.js') }}"></script>
+    
+    <!-- Include Edit Profile Modal -->
+    {% include 'edit_profile_modal.html' %}
+    
+    <!-- Include Maintenance Mode -->
+    {% include 'maintenance_mode.html' %}
+    
+    <!-- Include Account Deletion Request -->
+    {% include 'account_deletion_request.html' %}
+    
+    <!-- Floating WhatsApp Community Button -->
+    <div class="floating-whatsapp-button">
+        <a href="https://chat.whatsapp.com/DNVfWh3a5BQ2FWhvpJArgc" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn">
+            <i class="fab fa-whatsapp"></i>
+            <span class="whatsapp-text">Join Community</span>
+        </a>
+    </div>
+
+    <!-- Floating Feedback Button -->
+    {% if current_user.is_authenticated %}
+    <div class="floating-feedback-button">
+        <a href="{{ url_for('feedback.feedback_form') }}" class="feedback-float-btn">
+            <i class="fas fa-comment-dots"></i>
+            <span class="feedback-text">Send Feedback</span>
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Include JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/account-deletion.js') }}"></script>
+    
+    <!-- Set user role for JavaScript -->
+    <script>
+        document.body.dataset.userRole = '{{ current_user.role if current_user.is_authenticated else "guest" }}';
+    </script>
+    
+</body>
+</html>

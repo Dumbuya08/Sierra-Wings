@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Drones - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2">Manage Drones</h1>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Drone Fleet</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Model</th>
+                            <th>Status</th>
+                            <th>Battery</th>
+                            <th>Location</th>
+                            <th>Last Seen</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for drone in drones %}
+                        <tr>
+                            <td>{{ drone.id }}</td>
+                            <td>{{ drone.name }}</td>
+                            <td>{{ drone.model }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if drone.status == 'available' else 'warning' if drone.status == 'in_flight' else 'danger' }}">
+                                    {{ drone.status.title() }}
+                                </span>
+                            </td>
+                            <td>{{ drone.battery_level }}%</td>
+                            <td>
+                                {% if drone.location_lat and drone.location_lon %}
+                                    {{ "%.4f"|format(drone.location_lat) }}, {{ "%.4f"|format(drone.location_lon) }}
+                                {% else %}
+                                    Unknown
+                                {% endif %}
+                            </td>
+                            <td>{{ drone.last_seen.strftime('%Y-%m-%d %H:%M') if drone.last_seen else 'Never' }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-outline-success">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

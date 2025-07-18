@@ -1,0 +1,358 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('manage_users') }}">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('manage_drones') }}">
+                            <i class="fas fa-drone me-2"></i>Manage Drones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#broadcastModal">
+                            <i class="fas fa-bullhorn me-2"></i>Send Broadcast
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('announcements.admin_announcements') }}">
+                            <i class="fas fa-broadcast-tower me-2"></i>Manage Announcements
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_updates') }}">
+                            <i class="fas fa-envelope me-2"></i>Update Messages
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="window.voiceChecklist.openChecklist()">
+                            <i class="fas fa-microphone-alt me-2"></i>Voice Checklist
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-user-edit me-2"></i>Edit Profile
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-10 ms-sm-auto px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Admin Dashboard</h1>
+            </div>
+
+            <!-- Update Panel -->
+            {% include 'update_panel.html' %}
+
+            <!-- System Status Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h4>{{ total_users or 0 }}</h4>
+                            <p class="text-muted">Total Users</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-drone fa-2x text-success mb-2"></i>
+                            <h4>{{ active_drones or 0 }}</h4>
+                            <p class="text-muted">Active Drones</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shipping-fast fa-2x text-warning mb-2"></i>
+                            <h4>{{ pending_deliveries or 0 }}</h4>
+                            <p class="text-muted">Pending Deliveries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                            <h4>{{ system_alerts or 0 }}</h4>
+                            <p class="text-muted">System Alerts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-primary w-100" onclick="openUserManagement()">
+                                        <i class="fas fa-users me-2"></i>Manage Users
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-success w-100" onclick="openDroneManagement()">
+                                        <i class="fas fa-drone me-2"></i>Manage Drones
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#broadcastModal">
+                                        <i class="fas fa-bullhorn me-2"></i>Send Broadcast
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-danger w-100" onclick="toggleMaintenance()">
+                                        <i class="fas fa-tools me-2"></i>Maintenance
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-info w-100" onclick="openSystemLogs()">
+                                        <i class="fas fa-file-alt me-2"></i>System Logs
+                                    </button>
+                                </div>
+                                <div class="col-md-2 mb-3">
+                                    <button class="btn btn-secondary w-100" onclick="openSettings()">
+                                        <i class="fas fa-cogs me-2"></i>Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivity">
+                                <div class="activity-item">
+                                    <i class="fas fa-user-plus text-success me-2"></i>
+                                    <span>New user registered: patient_user123</span>
+                                    <small class="text-muted float-end">2 hours ago</small>
+                                </div>
+                                <div class="activity-item">
+                                    <i class="fas fa-drone text-primary me-2"></i>
+                                    <span>Drone SW-001 completed delivery</span>
+                                    <small class="text-muted float-end">3 hours ago</small>
+                                </div>
+                                <div class="activity-item">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                    <span>System maintenance scheduled</span>
+                                    <small class="text-muted float-end">5 hours ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>System Health</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="system-health">
+                                <div class="health-item">
+                                    <span>Database</span>
+                                    <span class="badge bg-success">Healthy</span>
+                                </div>
+                                <div class="health-item">
+                                    <span>API Services</span>
+                                    <span class="badge bg-success">Healthy</span>
+                                </div>
+                                <div class="health-item">
+                                    <span>Email Service</span>
+                                    <span class="badge bg-warning">Limited</span>
+                                </div>
+                                <div class="health-item">
+                                    <span>Drone Network</span>
+                                    <span class="badge bg-success">Healthy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Broadcast Modal -->
+<div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="broadcastModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="broadcastModalLabel">Send Broadcast Announcement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% include 'admin_broadcast.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function openUserManagement() {
+    window.location.href = '/admin/users';
+}
+
+function openDroneManagement() {
+    window.location.href = '/admin/drones';
+}
+
+function openSystemLogs() {
+    window.location.href = '/admin/logs';
+}
+
+function openSettings() {
+    window.location.href = '/admin/settings';
+}
+
+function toggleMaintenance() {
+    if (confirm('Are you sure you want to toggle maintenance mode?')) {
+        fetch('/admin/maintenance/toggle', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                enabled: !maintenanceEnabled
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error toggling maintenance mode');
+        });
+    }
+}
+
+// Check for system updates every 30 seconds
+setInterval(function() {
+    fetch('/api/admin/system-status')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateSystemStatus(data.status);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching system status:', error);
+        });
+}, 30000);
+
+function updateSystemStatus(status) {
+    // Update system status indicators
+    console.log('System status updated:', status);
+}
+
+// Initialize maintenance mode state
+let maintenanceEnabled = false;
+
+function updateSystemStatus(status) {
+    // Update dashboard with new status
+    document.querySelector('.fa-users').closest('.card-body').querySelector('h4').textContent = status.total_users || 0;
+    document.querySelector('.fa-drone').closest('.card-body').querySelector('h4').textContent = status.active_drones || 0;
+    document.querySelector('.fa-shipping-fast').closest('.card-body').querySelector('h4').textContent = status.pending_deliveries || 0;
+    document.querySelector('.fa-exclamation-triangle').closest('.card-body').querySelector('h4').textContent = status.system_alerts || 0;
+}
+
+// Initialize voice checklist system
+document.addEventListener('DOMContentLoaded', function() {
+    window.voiceChecklist = new VoiceChecklist();
+});
+</script>
+
+<!-- Voice Checklist Modal -->
+{% include 'voice_checklist_modal.html' %}
+
+<script src="{{ url_for('static', filename='js/voice-checklist.js') }}"></script>
+
+<style>
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.activity-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.health-item:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 767px) {
+    .sidebar {
+        position: static;
+        height: auto;
+    }
+}
+</style>
+{% endblock %}

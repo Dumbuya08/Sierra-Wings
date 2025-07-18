@@ -1,0 +1,854 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Dashboard - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('search_hospitals') }}">
+                            <i class="fas fa-hospital me-2"></i>Search Hospitals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#" data-bs-toggle="modal" data-bs-target="#supportModal">
+                            <i class="fas fa-life-ring me-2"></i>Help & Support
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="#" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-user-edit me-2"></i>Edit Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="#" data-bs-toggle="modal" data-bs-target="#accountDeletionModal">
+                            <i class="fas fa-user-times me-2"></i>Request Account Deletion
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">Patient Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('request_delivery') }}" class="btn-professional btn-professional-medical">
+                        <i class="fas fa-plus me-2"></i>Request Delivery
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Welcome Section -->
+            <div id="welcome-card" class="card mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" data-user-role="patient">
+                <div class="card-body text-white">
+                    <h4 class="mb-1">Welcome, {{ current_user.first_name or current_user.username }}!</h4>
+                    <p class="mb-0">Your medical delivery dashboard. Here you can request deliveries, track active missions, and view your delivery history.</p>
+                </div>
+            </div>
+            
+            <!-- Gamification Badges -->
+            <div class="badge-container">
+                <!-- Badges will be populated by JavaScript -->
+            </div>
+            
+            <!-- User Engagement Stats -->
+            <div class="engagement-stats">
+                <h5><i class="fas fa-trophy"></i> Your Healthcare Journey</h5>
+                <div class="engagement-grid">
+                    <div class="engagement-item">
+                        <span class="number">{{ total_missions or 0 }}</span>
+                        <span class="label">Deliveries</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="number">{{ active_missions or 0 }}</span>
+                        <span class="label">Active</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="number">100%</span>
+                        <span class="label">Success Rate</span>
+                    </div>
+                    <div class="engagement-item">
+                        <span class="number">{{ avg_delivery_time or 45 }}</span>
+                        <span class="label">Avg Time (min)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-primary mb-2">
+                                <i class="fas fa-box" style="font-size: 2rem;"></i>
+                            </div>
+                            <h3 class="text-dark mb-0">{{ total_missions }}</h3>
+                            <p class="text-muted mb-0">Total Requests</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-warning mb-2">
+                                <i class="fas fa-clock" style="font-size: 2rem;"></i>
+                            </div>
+                            <h3 class="text-dark mb-0">{{ active_missions }}</h3>
+                            <p class="text-muted mb-0">Active Deliveries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-success mb-2">
+                                <i class="fas fa-check-circle" style="font-size: 2rem;"></i>
+                            </div>
+                            <h3 class="text-dark mb-0">{{ completed_missions }}</h3>
+                            <p class="text-muted mb-0">Completed</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card text-center border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-info mb-2">
+                                <i class="fas fa-star" style="font-size: 2rem;"></i>
+                            </div>
+                            <h3 class="text-dark mb-0">4.8/5</h3>
+                            <p class="text-muted mb-0">Satisfaction</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            {% include 'quick_actions_new.html' %}
+            
+            <!-- Account Deletion Status -->
+            {% include 'account_deletion_request.html' %}
+
+            <!-- Two Column Layout -->
+            <div class="row mb-4">
+                <!-- Recent Delivery Requests -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 text-dark">Recent Delivery Requests</h5>
+                            <a href="{{ url_for('get_missions') }}" class="btn-professional btn-professional-outline-primary btn-professional-sm">
+                                <i class="fas fa-history me-1"></i>View All
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            {% if missions %}
+                                {% for mission in missions[:3] %}
+                                <div class="delivery-item p-3 mb-3 border {{ 'border-success' if mission.status == 'completed' else 'border-warning' if mission.status == 'in_progress' else 'border-primary' if mission.status == 'accepted' else 'border-secondary' }}" style="border-radius: 8px; background: white;">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-{{ 'ambulance' if mission.mission_type == 'emergency' else 'box' }} me-2 text-primary"></i>
+                                                    <h6 class="mb-0 text-dark">{{ mission.mission_type.title() }} Delivery #{{ mission.id }}</h6>
+                                                </div>
+                                                <a href="{{ url_for('track_mission', mission_id=mission.id) }}" class="btn-professional btn-professional-outline-primary btn-professional-sm">
+                                                    <i class="fas fa-eye me-1"></i>Track
+                                                </a>
+                                            </div>
+                                            
+                                            <div class="mb-2">
+                                                <span class="status-badge badge bg-{{ 'success' if mission.status == 'completed' else 'warning' if mission.status == 'in_progress' else 'primary' if mission.status == 'accepted' else 'secondary' }} me-2">
+                                                    {% if mission.status == 'in_progress' %}
+                                                        In Progress
+                                                    {% elif mission.status == 'completed' %}
+                                                        Completed
+                                                    {% elif mission.status == 'accepted' %}
+                                                        Accepted
+                                                    {% elif mission.status == 'requested' %}
+                                                        Requested
+                                                    {% elif mission.status == 'cancelled' %}
+                                                        Cancelled
+                                                    {% else %}
+                                                        {{ mission.status.replace('_', ' ').title() }}
+                                                    {% endif %}
+                                                </span>
+                                                <span class="status-badge badge bg-{{ 'danger' if mission.priority == 'emergency' else 'warning' if mission.priority == 'high' else 'info' }}">
+                                                    {{ mission.priority.title() }} Priority
+                                                </span>
+                                            </div>
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>{{ mission.requested_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                                    </small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-map-marker-alt me-1"></i>{{ mission.delivery_address[:50] }}...
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            
+                                            {% if mission.medical_items %}
+                                            <div class="mt-2">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-pills me-1"></i>{{ mission.medical_items[:60] }}...
+                                                </small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center py-4">
+                                    <i class="fas fa-box text-muted mb-3" style="font-size: 3rem;"></i>
+                                    <h5 class="text-dark">No delivery requests yet</h5>
+                                    <p class="text-muted">Get started by requesting your first medical delivery</p>
+                                    <a href="{{ url_for('request_delivery') }}" class="btn-professional btn-professional-medical">
+                                        <i class="fas fa-plus me-2"></i>Request Delivery
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Tracking Map -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 text-dark">Live Tracking</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="tracking-map" style="height: 300px; border-radius: 8px;"></div>
+                            <style>
+                                .drone-marker {
+                                    background: none;
+                                    border: none;
+                                    font-size: 18px;
+                                    text-align: center;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                }
+                                .user-marker {
+                                    background: none;
+                                    border: none;
+                                    font-size: 18px;
+                                    text-align: center;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                }
+                                .delivery-item {
+                                    background: white;
+                                    border-radius: 8px;
+                                    transition: all 0.3s ease;
+                                    border: 1px solid #dee2e6;
+                                }
+                                .delivery-item:hover {
+                                    transform: translateY(-2px);
+                                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                                }
+                                .status-badge {
+                                    white-space: nowrap;
+                                    display: inline-block;
+                                    font-size: 0.75rem;
+                                    padding: 0.25rem 0.5rem;
+                                    min-width: 80px;
+                                    text-align: center;
+                                }
+                            </style>
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small class="text-muted">Active Deliveries:</small>
+                                    <small class="text-dark fw-bold">{{ active_missions }}</small>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small class="text-muted">Nearest Drone:</small>
+                                    <small class="text-success fw-bold">2.3 km</small>
+                                </div>
+                                
+                                <!-- Weather Widget for Drone Operations -->
+                                <div class="weather-widget mt-3 p-3 bg-light rounded">
+                                    <h6 class="mb-2 text-dark">
+                                        <i class="fas fa-cloud-sun me-2"></i>Flight Conditions
+                                    </h6>
+                                    <div id="weather-info" class="weather-info">
+                                        <div class="text-center">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading weather...</span>
+                                            </div>
+                                            <p class="small mt-2 mb-0 text-muted">Getting current weather...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row -->
+            <div class="row">
+                <!-- Quick Actions -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 text-dark">Quick Actions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{{ url_for('request_delivery') }}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-2"></i>New Delivery Request
+                                </a>
+                                <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-user me-2"></i>Update Profile
+                                </a>
+                                <a href="{{ url_for('feedback') }}" class="btn btn-outline-info">
+                                    <i class="fas fa-comment me-2"></i>Send Feedback
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contacts -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 text-dark">Emergency Contacts</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Emergency Hotline:</strong><br>
+                                <span class="text-danger">
+                                    <i class="fas fa-phone me-2"></i><a href="tel:+23230700479" class="text-danger text-decoration-none">+232 30 700 479</a>
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Support:</strong><br>
+                                <span class="text-primary">
+                                    <i class="fas fa-envelope me-2"></i><a href="mailto:sierrawingsofficial@gmail.com" class="text-primary text-decoration-none">sierrawingsofficial@gmail.com</a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Include Quick Actions -->
+{% include 'quick_actions.html' %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh for mission updates
+    setInterval(function() {
+        fetch('/api/missions/stats')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dashboard stats updated:', data);
+            })
+            .catch(error => console.error('Error updating dashboard:', error));
+    }, 30000);
+
+    // Auto-dismiss welcome message
+    document.addEventListener('DOMContentLoaded', function() {
+        const welcomeCard = document.getElementById('welcome-card');
+        if (welcomeCard) {
+            setTimeout(function() {
+                welcomeCard.style.transition = 'opacity 0.5s ease-out';
+                welcomeCard.style.opacity = '0';
+                setTimeout(function() {
+                    welcomeCard.style.display = 'none';
+                }, 500);
+            }, 3000); // 3 seconds
+        }
+        
+        // Initialize tracking map
+        initTrackingMap();
+        
+        // Initialize weather widget
+        initWeatherWidget();
+    });
+
+    // Global variables for map functionality
+    let userMarker = null;
+    let locationCircle = null;
+    let watchId = null;
+    let droneMarkers = [];
+    let currentUserLocation = null;
+    let trackingMap = null;
+
+    function initTrackingMap() {
+        // Initialize Leaflet map with default view (will be updated with real location)
+        trackingMap = L.map('tracking-map').setView([8.4606, -11.7799], 12); // Freetown, Sierra Leone default
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(trackingMap);
+        
+        // Create icons
+        const droneIcon = L.divIcon({
+            html: '<i class="fas fa-drone text-primary"></i>',
+            iconSize: [20, 20],
+            className: 'drone-marker'
+        });
+        
+        const userIcon = L.divIcon({
+            html: '<i class="fas fa-user text-success"></i>',
+            iconSize: [20, 20],
+            className: 'user-marker'
+        });
+        
+        // Request user's real location and start watching for changes
+        if (navigator.geolocation) {
+            // Get initial position
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    currentUserLocation = { lat: lat, lng: lng };
+                    
+                    // Update map center to user's location
+                    trackingMap.setView([lat, lng], 15);
+                    
+                    // Add user location marker
+                    userMarker = L.marker([lat, lng], { icon: userIcon })
+                        .addTo(trackingMap)
+                        .bindPopup(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m`);
+                    
+                    // Add accuracy circle
+                    locationCircle = L.circle([lat, lng], {
+                        color: 'blue',
+                        fillColor: '#30f',
+                        fillOpacity: 0.1,
+                        radius: accuracy
+                    }).addTo(trackingMap);
+                    
+                    // Fetch real drone locations from API
+                    fetch('/api/drones/locations')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.drones && data.drones.length > 0) {
+                                data.drones.forEach(drone => {
+                                    if (drone.location_lat && drone.location_lon) {
+                                        const distance = calculateDistance(lat, lng, drone.location_lat, drone.location_lon);
+                                        const droneMarker = L.marker([drone.location_lat, drone.location_lon], { icon: droneIcon })
+                                            .addTo(trackingMap)
+                                            .bindPopup(`<b>${drone.name}</b><br/>Status: ${drone.status}<br/>Distance: ${distance.toFixed(1)}km`);
+                                        droneMarkers.push(droneMarker);
+                                    }
+                                });
+                            } else {
+                                // Add sample drones near user location if no real data available
+                                const sampleDrones = [
+                                    { lat: lat + 0.01, lng: lng + 0.01, name: 'Drone Alpha', status: 'Available' },
+                                    { lat: lat - 0.01, lng: lng + 0.01, name: 'Drone Beta', status: 'In Flight' },
+                                    { lat: lat + 0.01, lng: lng - 0.01, name: 'Drone Gamma', status: 'Available' }
+                                ];
+                                
+                                sampleDrones.forEach(drone => {
+                                    const distance = calculateDistance(lat, lng, drone.lat, drone.lng);
+                                    const droneMarker = L.marker([drone.lat, drone.lng], { icon: droneIcon })
+                                        .addTo(trackingMap)
+                                        .bindPopup(`<b>${drone.name}</b><br/>Status: ${drone.status}<br/>Distance: ${distance.toFixed(1)}km`);
+                                    droneMarkers.push(droneMarker);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching drone locations:', error);
+                            // Add sample drones near user location as fallback
+                            const sampleDrones = [
+                                { lat: lat + 0.01, lng: lng + 0.01, name: 'Drone Alpha', status: 'Available' },
+                                { lat: lat - 0.01, lng: lng + 0.01, name: 'Drone Beta', status: 'In Flight' },
+                                { lat: lat + 0.01, lng: lng - 0.01, name: 'Drone Gamma', status: 'Available' }
+                            ];
+                            
+                            sampleDrones.forEach(drone => {
+                                const distance = calculateDistance(lat, lng, drone.lat, drone.lng);
+                                const droneMarker = L.marker([drone.lat, drone.lng], { icon: droneIcon })
+                                    .addTo(trackingMap)
+                                    .bindPopup(`<b>${drone.name}</b><br/>Status: ${drone.status}<br/>Distance: ${distance.toFixed(1)}km`);
+                                droneMarkers.push(droneMarker);
+                            });
+                        });
+                    
+                    // Update nearest drone distance display
+                    updateNearestDroneDistance(lat, lng);
+                    
+                    // Start watching for location changes
+                    startLocationWatching(trackingMap, userIcon, droneIcon, userMarker, locationCircle);
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                    // Fallback to default location with sample drones
+                    const defaultLat = 8.4606;
+                    const defaultLng = -11.7799;
+                    
+                    currentUserLocation = { lat: defaultLat, lng: defaultLng };
+                    
+                    L.marker([defaultLat, defaultLng], { icon: userIcon })
+                        .addTo(trackingMap)
+                        .bindPopup('<b>Default Location</b><br/>Enable location services for accurate positioning');
+                    
+                    // Add sample drones
+                    const sampleDrones = [
+                        { lat: defaultLat + 0.01, lng: defaultLng + 0.01, name: 'Drone Alpha', status: 'Available' },
+                        { lat: defaultLat - 0.01, lng: defaultLng + 0.01, name: 'Drone Beta', status: 'In Flight' },
+                        { lat: defaultLat + 0.01, lng: defaultLng - 0.01, name: 'Drone Gamma', status: 'Available' }
+                    ];
+                    
+                    sampleDrones.forEach(drone => {
+                        L.marker([drone.lat, drone.lng], { icon: droneIcon })
+                            .addTo(trackingMap)
+                            .bindPopup(`<b>${drone.name}</b><br/>Status: ${drone.status}`);
+                    });
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        } else {
+            // Geolocation not supported
+            L.marker([8.4606, -11.7799], { icon: userIcon })
+                .addTo(trackingMap)
+                .bindPopup('<b>Location Services Unavailable</b>');
+        }
+    }
+    
+    // Calculate distance between two coordinates
+    function calculateDistance(lat1, lng1, lat2, lng2) {
+        const R = 6371; // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLng = (lng2 - lng1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Update nearest drone distance
+    function updateNearestDroneDistance(userLat, userLng) {
+        fetch('/api/drones/locations')
+            .then(response => response.json())
+            .then(data => {
+                if (data.drones && data.drones.length > 0) {
+                    let nearestDistance = Infinity;
+                    data.drones.forEach(drone => {
+                        if (drone.location_lat && drone.location_lon) {
+                            const distance = calculateDistance(userLat, userLng, drone.location_lat, drone.location_lon);
+                            if (distance < nearestDistance) {
+                                nearestDistance = distance;
+                            }
+                        }
+                    });
+                    
+                    const nearestDroneElement = document.querySelector('.text-success.fw-bold');
+                    if (nearestDroneElement && nearestDistance !== Infinity) {
+                        nearestDroneElement.textContent = `${nearestDistance.toFixed(1)} km`;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating nearest drone distance:', error);
+            });
+    }
+    
+    // Start watching user location for real-time updates
+    function startLocationWatching(trackingMap, userIcon, droneIcon, userMarker, locationCircle) {
+        if (navigator.geolocation) {
+            watchId = navigator.geolocation.watchPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+                    
+                    // Update user marker position
+                    if (userMarker) {
+                        userMarker.setLatLng([lat, lng]);
+                        userMarker.setPopupContent(`<b>Your Location</b><br/>Accuracy: ±${Math.round(accuracy)}m<br/>Last updated: ${new Date().toLocaleTimeString()}`);
+                    }
+                    
+                    // Update current user location
+                    currentUserLocation = { lat, lng };
+                    
+                    // Update accuracy circle
+                    if (locationCircle) {
+                        locationCircle.setLatLng([lat, lng]);
+                        locationCircle.setRadius(accuracy);
+                    }
+                    
+                    // Update drone distances
+                    updateNearestDroneDistance(lat, lng);
+                    updateDroneDistances(lat, lng);
+                },
+                function(error) {
+                    console.error('Location watching error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 30000,
+                    maximumAge: 60000
+                }
+            );
+        }
+    }
+    
+    // Update drone marker distances
+    function updateDroneDistances(userLat, userLng) {
+        droneMarkers.forEach(marker => {
+            const droneLatLng = marker.getLatLng();
+            const distance = calculateDistance(userLat, userLng, droneLatLng.lat, droneLatLng.lng);
+            const popupContent = marker.getPopup().getContent();
+            const updatedContent = popupContent.replace(/Distance: \d+\.\d+km/, `Distance: ${distance.toFixed(1)}km`);
+            marker.setPopupContent(updatedContent);
+        });
+    }
+    
+    // Clean up location watching when page unloads
+    window.addEventListener('beforeunload', function() {
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+    });
+    
+    // Weather Widget for Drone Operations
+    function initWeatherWidget() {
+        // Always use simulated weather data for Sierra Leone since we don't have a real API key
+        displaySimulatedWeather();
+        
+        // Update weather every 30 seconds
+        setInterval(() => {
+            displaySimulatedWeather();
+        }, 30000);
+    }
+    
+    function displayWeatherInfo(data) {
+        const weatherInfo = document.getElementById('weather-info');
+        const temp = Math.round(data.main.temp);
+        const windSpeed = Math.round(data.wind.speed * 3.6); // Convert m/s to km/h
+        const humidity = data.main.humidity;
+        const visibility = data.visibility ? Math.round(data.visibility / 1000) : 10;
+        const description = data.weather[0].description;
+        
+        // Determine flight conditions
+        const flightCondition = getFlightCondition(temp, windSpeed, humidity, description);
+        
+        weatherInfo.innerHTML = `
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-thermometer-half text-info me-2"></i>
+                        <small>${temp}°C</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-wind text-primary me-2"></i>
+                        <small>${windSpeed} km/h</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-eye text-success me-2"></i>
+                        <small>${visibility} km</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-tint text-info me-2"></i>
+                        <small>${humidity}%</small>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="flight-status ${flightCondition.class}">
+                        <i class="fas fa-${flightCondition.icon} me-2"></i>
+                        <strong>${flightCondition.status}</strong>
+                    </div>
+                    <small class="text-muted d-block mt-1">${description}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    function loadRealTimeWeather() {
+        const weatherInfo = document.getElementById('weather-info');
+        const loadingSpinner = `
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin"></i>
+                <small class="d-block mt-1">Loading weather...</small>
+            </div>
+        `;
+        
+        weatherInfo.innerHTML = loadingSpinner;
+        
+        fetch('/api/weather')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayWeatherData(data.weather);
+                } else {
+                    displayWeatherError();
+                }
+            })
+            .catch(error => {
+                console.error('Weather API error:', error);
+                displayWeatherError();
+            });
+    }
+    
+    function displayWeatherData(weather) {
+        const weatherInfo = document.getElementById('weather-info');
+        const flightSafety = weather.flight_safety;
+        
+        weatherInfo.innerHTML = `
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-thermometer-half text-info me-2"></i>
+                        <small>${weather.temperature}°C</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-wind text-primary me-2"></i>
+                        <small>${weather.wind_speed} km/h</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-eye text-success me-2"></i>
+                        <small>${weather.visibility} km</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-tint text-info me-2"></i>
+                        <small>${weather.humidity}%</small>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="flight-status text-${flightSafety.color}">
+                        <i class="fas fa-${flightSafety.icon} me-2"></i>
+                        <strong>${flightSafety.status}</strong>
+                    </div>
+                    <small class="text-muted d-block mt-1">${weather.description}</small>
+                    <small class="text-muted d-block">${weather.location}, ${weather.country}</small>
+                </div>
+            </div>
+        `;
+    }
+    
+    function displayWeatherError() {
+        const weatherInfo = document.getElementById('weather-info');
+        weatherInfo.innerHTML = `
+            <div class="text-center text-muted">
+                <i class="fas fa-exclamation-triangle"></i>
+                <small class="d-block mt-1">Weather data unavailable</small>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadRealTimeWeather()">
+                    <i class="fas fa-sync me-1"></i>Retry
+                </button>
+            </div>
+        `;
+    }
+    
+    function getFlightCondition(temp, windSpeed, humidity, description) {
+        // Define flight conditions based on weather parameters
+        if (description.includes('heavy rain') || description.includes('thunderstorm') || windSpeed > 30) {
+            return {
+                status: 'Flights Grounded',
+                class: 'text-danger',
+                icon: 'times-circle'
+            };
+        } else if (description.includes('rain') || description.includes('drizzle') || windSpeed > 20 || humidity > 85) {
+            return {
+                status: 'Flights Limited',
+                class: 'text-warning',
+                icon: 'exclamation-triangle'
+            };
+        } else if (windSpeed > 15 || humidity > 80) {
+            return {
+                status: 'Caution Advised',
+                class: 'text-info',
+                icon: 'info-circle'
+            };
+        } else {
+            return {
+                status: 'Good for Flights',
+                class: 'text-success',
+                icon: 'check-circle'
+            };
+        }
+    }
+    
+    // Initialize dashboard features
+    initLocationTracking();
+    initDashboardUpdates();
+    initWeatherWidget();
+    
+    function initWeatherWidget() {
+        // Initialize weather widget with real-time data
+        loadRealTimeWeather();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadRealTimeWeather, 30000);
+    }
+    
+    // Initialize gamification if available
+    if (typeof window.ContextualHelp !== 'undefined') {
+        window.contextualHelpInstance = new window.ContextualHelp();
+    }
+    
+    // Initialize loading indicators if available
+    if (typeof window.LoadingIndicators !== 'undefined') {
+        window.loadingIndicatorsInstance = new window.LoadingIndicators();
+    }
+    
+});
+</script>
+{% endblock %}

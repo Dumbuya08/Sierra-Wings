@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    {% if current_user.role == 'patient' %}
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('search_hospitals') }}">
+                            <i class="fas fa-hospital me-2"></i>Search Hospitals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                    {% elif current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('manage_users') }}">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('manage_drones') }}">
+                            <i class="fas fa-drone me-2"></i>Manage Drones
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('system_settings') }}">
+                            <i class="fas fa-cogs me-2"></i>System Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('hospital.dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('hospital.patients') }}">
+                            <i class="fas fa-users me-2"></i>Manage Patients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('hospital.register_patient') }}">
+                            <i class="fas fa-user-plus me-2"></i>Register Patient
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('hospital.services') }}">
+                            <i class="fas fa-hand-holding-medical me-2"></i>Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cogs me-2"></i>Settings
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">My Profile</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('settings') }}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Profile Card -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <div class="mb-3">
+                                <i class="fas fa-user-circle fa-5x text-muted"></i>
+                            </div>
+                            <h5 class="card-title">{{ current_user.first_name }} {{ current_user.last_name }}</h5>
+                            <p class="text-muted">@{{ current_user.username }}</p>
+                            <span class="badge bg-{% if current_user.role == 'admin' %}danger{% elif current_user.role == 'clinic' %}warning{% else %}info{% endif %} mb-3">
+                                {{ current_user.role.title() }}
+                            </span>
+                            <div class="mt-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="border-end">
+                                            <h6 class="mb-0">{{ current_user.created_at.strftime('%b %Y') if current_user.created_at else 'N/A' }}</h6>
+                                            <small class="text-muted">Joined</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="mb-0">
+                                            {% if current_user.role == 'patient' %}
+                                                {{ current_user.missions|length if current_user.missions else 0 }}
+                                            {% elif current_user.role == 'clinic' %}
+                                                {{ current_user.hospital_patients|length if current_user.hospital_patients else 0 }}
+                                            {% else %}
+                                                Active
+                                            {% endif %}
+                                        </h6>
+                                        <small class="text-muted">
+                                            {% if current_user.role == 'patient' %}
+                                                Deliveries
+                                            {% elif current_user.role == 'clinic' %}
+                                                Patients
+                                            {% else %}
+                                                Status
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Details -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Username</label>
+                                        <p class="mb-0">{{ current_user.username }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Email</label>
+                                        <p class="mb-0">{{ current_user.email }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">First Name</label>
+                                        <p class="mb-0">{{ current_user.first_name or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Last Name</label>
+                                        <p class="mb-0">{{ current_user.last_name or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Phone</label>
+                                        <p class="mb-0">{{ current_user.phone or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Role</label>
+                                        <p class="mb-0">{{ current_user.role.title() }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Address</label>
+                                <p class="mb-0">{{ current_user.address or 'Not provided' }}</p>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Account Status</label>
+                                        <p class="mb-0">
+                                            <span class="badge bg-{% if current_user.is_active %}success{% else %}danger{% endif %}">
+                                                {{ 'Active' if current_user.is_active else 'Inactive' }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Email Verified</label>
+                                        <p class="mb-0">
+                                            <span class="badge bg-{% if current_user.email_verified %}success{% else %}warning{% endif %}">
+                                                {{ 'Verified' if current_user.email_verified else 'Not Verified' }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Activity -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Account Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Member Since</label>
+                                        <p class="mb-0">{{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else 'N/A' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Last Updated</label>
+                                        <p class="mb-0">{{ current_user.updated_at.strftime('%B %d, %Y') if current_user.updated_at else 'N/A' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if current_user.role == 'patient' %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Total Deliveries</label>
+                                        <p class="mb-0">{{ current_user.missions|length if current_user.missions else 0 }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Emergency Contact</label>
+                                        <p class="mb-0">{{ current_user.emergency_contact or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% elif current_user.role == 'clinic' %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Clinic Name</label>
+                                        <p class="mb-0">{{ current_user.clinic_name or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">License Number</label>
+                                        <p class="mb-0">{{ current_user.clinic_license or 'Not provided' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

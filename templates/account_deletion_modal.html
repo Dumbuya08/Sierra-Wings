@@ -1,0 +1,117 @@
+<!-- Account Deletion Modal -->
+<div class="modal fade" id="accountDeletionModal" tabindex="-1" aria-labelledby="accountDeletionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="accountDeletionModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Request Account Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Important:</strong> This action cannot be undone. All your data will be permanently deleted.
+                </div>
+                
+                <form id="accountDeletionForm">
+                    <div class="mb-3">
+                        <label for="deletionReason" class="form-label">Reason for deletion (optional)</label>
+                        <textarea class="form-control" id="deletionReason" rows="3" 
+                                  placeholder="Please tell us why you're deleting your account..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDeletion" required>
+                            <label class="form-check-label" for="confirmDeletion">
+                                I understand that this action is permanent and cannot be undone
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDataLoss" required>
+                            <label class="form-check-label" for="confirmDataLoss">
+                                I understand that all my data will be permanently deleted
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Request Account Deletion
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle account deletion form submission
+    document.getElementById('accountDeletionForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const reason = document.getElementById('deletionReason').value;
+        const confirmDeletion = document.getElementById('confirmDeletion').checked;
+        const confirmDataLoss = document.getElementById('confirmDataLoss').checked;
+        
+        if (!confirmDeletion || !confirmDataLoss) {
+            alert('Please confirm both checkboxes to proceed.');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting Request...';
+        
+        // Submit deletion request
+        fetch('/request_account_deletion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                reason: reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Account deletion request submitted successfully. An admin will review your request.');
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('accountDeletionModal'));
+                modal.hide();
+                
+                // Refresh page to show deletion status
+                window.location.reload();
+            } else {
+                alert('Error submitting request: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error submitting request. Please try again.');
+        })
+        .finally(() => {
+            // Reset button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-trash me-2"></i>Request Account Deletion';
+        });
+    });
+});
+</script>
+
+<style>
+.modal-header .text-danger {
+    color: #dc3545 !important;
+}
+</style>

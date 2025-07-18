@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Register - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <h2>Create Account</h2>
+                        <p class="text-muted">Join the medical delivery network</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" name="username" required placeholder="Choose a unique username">
+                            <div class="form-text">This will be your login username. Choose something unique and memorable.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="+232 XX XXX XXXX">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                            <div class="form-text">You must be at least 13 years old to create an account.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <div class="form-text">Password must be at least 6 characters long</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <div class="form-text">Please re-enter your password to confirm</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Account Type</label>
+                            <select class="form-select" id="role" name="role" required onchange="toggleRoleFields()">
+                                <option value="">Select account type</option>
+                                <option value="patient">Patient</option>
+                                <option value="clinic">Healthcare Provider</option>
+                                <option value="admin">Administrator</option>
+                            </select>
+                        </div>
+                        
+                        <!-- No invite code required during registration anymore -->
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+                        </div>
+                        
+                        <!-- Patient-specific fields -->
+                        <div id="patient_fields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="emergency_contact" class="form-label">Emergency Contact</label>
+                                <input type="text" class="form-control" id="emergency_contact" name="emergency_contact">
+                            </div>
+                            <div class="mb-3">
+                                <label for="allergies" class="form-label">Allergies</label>
+                                <textarea class="form-control" id="allergies" name="allergies" rows="2"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Clinic-specific fields -->
+                        <div id="clinic_fields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="clinic_name" class="form-label">Clinic/Hospital Name</label>
+                                <input type="text" class="form-control" id="clinic_name" name="clinic_name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="clinic_license" class="form-label">License Number</label>
+                                <input type="text" class="form-control" id="clinic_license" name="clinic_license">
+                            </div>
+                            <div class="mb-3">
+                                <label for="specialization" class="form-label">Specialization</label>
+                                <input type="text" class="form-control" id="specialization" name="specialization">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6>Data Privacy Preferences</h6>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="data_processing_consent" name="data_processing_consent" checked required>
+                                <label class="form-check-label" for="data_processing_consent">
+                                    I consent to processing of my personal data for service delivery (Required)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="marketing_consent" name="marketing_consent">
+                                <label class="form-check-label" for="marketing_consent">
+                                    I consent to receiving marketing communications (Optional)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="data_retention_consent" name="data_retention_consent" checked>
+                                <label class="form-check-label" for="data_retention_consent">
+                                    I consent to data retention for service improvements (Optional)
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="{{ url_for('terms_of_service') }}" target="_blank">Terms of Service</a> and <a href="{{ url_for('privacy_policy') }}" target="_blank">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                    </form>
+                    
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('auth.login') }}">Sign in here</a></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Registration Info -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">Registration Requirements</h6>
+                    <small class="text-muted">
+                        <strong>Patient:</strong> Open registration with email verification<br>
+                        <strong>Healthcare Provider:</strong> No email verification required - ready to use immediately<br>
+                        <strong>Administrator:</strong> No email verification required - ready to use immediately<br>
+                        <strong>Note:</strong> Access codes are now required during login for clinic and admin accounts
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleRoleFields() {
+    const role = document.getElementById('role').value;
+    const patientFields = document.getElementById('patient_fields');
+    const clinicFields = document.getElementById('clinic_fields');
+    
+    // Hide all fields initially
+    patientFields.style.display = 'none';
+    clinicFields.style.display = 'none';
+    
+    // Show relevant fields based on role
+    if (role === 'patient') {
+        patientFields.style.display = 'block';
+    } else if (role === 'clinic') {
+        clinicFields.style.display = 'block';
+    }
+    // Admin doesn't need additional fields
+}
+</script>
+{% endblock %}

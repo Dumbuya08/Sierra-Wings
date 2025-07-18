@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Communication Preferences - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h1 class="display-6 fw-bold text-dark">Communication Preferences</h1>
+                        <p class="text-muted">Control what communications you receive from SierraWings</p>
+                    </div>
+
+                    <form method="POST">
+                        <div class="mb-4">
+                            <h5>Essential Communications</h5>
+                            <p class="text-muted">These communications are required for service delivery and cannot be disabled.</p>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="service_updates" checked disabled>
+                                <label class="form-check-label" for="service_updates">
+                                    <strong>Service Updates</strong><br>
+                                    <small class="text-muted">Delivery confirmations, mission updates, and emergency notifications</small>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="security_alerts" checked disabled>
+                                <label class="form-check-label" for="security_alerts">
+                                    <strong>Security Alerts</strong><br>
+                                    <small class="text-muted">Account security, password resets, and login notifications</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Optional Communications</h5>
+                            <p class="text-muted">You can choose to receive or opt out of these communications.</p>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="marketing_consent" name="marketing_consent" {{ 'checked' if current_user.marketing_consent }}>
+                                <label class="form-check-label" for="marketing_consent">
+                                    <strong>Marketing Communications</strong><br>
+                                    <small class="text-muted">Service announcements, new features, and promotional content</small>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="survey_feedback" name="survey_feedback" {{ 'checked' if current_user.data_retention_consent }}>
+                                <label class="form-check-label" for="survey_feedback">
+                                    <strong>Surveys and Feedback</strong><br>
+                                    <small class="text-muted">Requests for service feedback and user experience surveys</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <h5>Communication Methods</h5>
+                            <p class="text-muted">Choose how you prefer to receive communications.</p>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="email_notifications" name="email_notifications" checked>
+                                <label class="form-check-label" for="email_notifications">
+                                    <strong>Email Notifications</strong><br>
+                                    <small class="text-muted">Receive notifications via email at {{ current_user.email }}</small>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="sms_notifications" name="sms_notifications">
+                                <label class="form-check-label" for="sms_notifications">
+                                    <strong>SMS Notifications</strong><br>
+                                    <small class="text-muted">Receive text messages at {{ current_user.phone or 'No phone number on file' }}</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary me-3">
+                                <i class="fas fa-save me-2"></i>Save Preferences
+                            </button>
+                            <a href="{{ url_for('data_privacy') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Privacy
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

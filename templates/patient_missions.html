@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Delivery History - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('patient_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('request_delivery') }}">
+                            <i class="fas fa-plus me-2"></i>Request Delivery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('search_hospitals') }}">
+                            <i class="fas fa-hospital me-2"></i>Search Hospitals
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-primary" href="{{ url_for('get_missions') }}">
+                            <i class="fas fa-history me-2"></i>Delivery History
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-2"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" href="{{ url_for('settings') }}">
+                            <i class="fas fa-cog me-2"></i>Settings
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                <h1 class="h2 text-dark">Delivery History</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('request_delivery') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>New Request
+                    </a>
+                </div>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="requested">Requested</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="assigned">Assigned</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="priorityFilter">
+                                <option value="">All Priority</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="standard">Standard</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control" id="dateFilter">
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-primary" onclick="applyFilters()">
+                                <i class="fas fa-filter me-2"></i>Filter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missions List -->
+            <div class="row">
+                {% for mission in missions %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">Request #{{ mission.id }}</h6>
+                            <span class="badge bg-{% if mission.status == 'completed' %}success{% elif mission.status == 'cancelled' %}danger{% elif mission.status == 'in_progress' %}warning{% else %}info{% endif %}">
+                                {{ mission.status.replace('_', ' ').title() }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong>Medical Items:</strong>
+                                <p class="text-muted small">{{ mission.medical_items }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Priority:</strong>
+                                <span class="badge bg-{% if mission.priority == 'emergency' %}danger{% elif mission.priority == 'urgent' %}warning{% else %}info{% endif %}">
+                                    {{ mission.priority.title() }}
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Delivery Address:</strong>
+                                <p class="text-muted small">{{ mission.delivery_address }}</p>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Requested:</strong>
+                                <p class="text-muted small">{{ mission.created_at.strftime('%Y-%m-%d %H:%M') if mission.created_at else 'N/A' }}</p>
+                            </div>
+                            {% if mission.completed_at %}
+                            <div class="mb-2">
+                                <strong>Completed:</strong>
+                                <p class="text-muted small">{{ mission.completed_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <a href="{{ url_for('track_mission', mission_id=mission.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-map-marker-alt"></i> Track
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="viewDetails({{ mission.id }})">
+                                    <i class="fas fa-eye"></i> Details
+                                </button>
+                                {% if mission.status == 'requested' %}
+                                <button class="btn btn-sm btn-outline-danger" onclick="cancelMission({{ mission.id }})">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not missions %}
+            <div class="text-center py-5">
+                <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                <h4>No Delivery Requests Yet</h4>
+                <p class="text-muted">You haven't made any delivery requests yet.</p>
+                <a href="{{ url_for('request_delivery') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Request Your First Delivery
+                </a>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<script>
+function applyFilters() {
+    const status = document.getElementById('statusFilter').value;
+    const priority = document.getElementById('priorityFilter').value;
+    const date = document.getElementById('dateFilter').value;
+    
+    // Filter logic will be implemented
+    console.log('Applying filters:', { status, priority, date });
+}
+
+function viewDetails(missionId) {
+    // View details modal or page
+    alert('View details for mission ' + missionId);
+}
+
+function cancelMission(missionId) {
+    if (confirm('Are you sure you want to cancel this delivery request?')) {
+        // Cancel mission logic
+        alert('Mission ' + missionId + ' has been cancelled');
+    }
+}
+</script>
+{% endblock %}

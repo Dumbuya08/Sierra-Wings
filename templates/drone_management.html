@@ -1,0 +1,624 @@
+{% extends "base.html" %}
+
+{% block title %}Drone Management - SierraWings{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                            <i class="fas fa-dashboard"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('user_management') }}">
+                            <i class="fas fa-users"></i> User Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('drone_management') }}">
+                            <i class="fas fa-drone"></i> Drone Management
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('live_tracking') }}">
+                            <i class="fas fa-map"></i> Live Tracking
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Drone Fleet Management</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button class="btn btn-outline-secondary me-2" onclick="refreshDrones()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                    <button class="btn btn-success me-2" onclick="discoverDrones()">
+                        <i class="fas fa-search"></i> Discover Drones
+                    </button>
+                    <button class="btn btn-primary" onclick="showAddDroneModal()">
+                        <i class="fas fa-plus"></i> Add Drone
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Fleet Status Overview -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-drone text-primary" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ drones|length }}</h5>
+                            <p class="card-text">Total Drones</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ drones|selectattr('status', 'equalto', 'available')|list|length }}</h5>
+                            <p class="card-text">Available</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-plane text-info" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ drones|selectattr('status', 'equalto', 'in_flight')|list|length }}</h5>
+                            <p class="card-text">In Flight</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-wrench text-warning" style="font-size: 2rem;"></i>
+                            <h5 class="card-title mt-2">{{ drones|selectattr('status', 'equalto', 'maintenance')|list|length }}</h5>
+                            <p class="card-text">Maintenance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drone Discovery Status -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-satellite"></i> Live Discovery Status
+                                <span class="badge bg-success ms-2" id="discoveryStatus">Online</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Discovery Service:</strong> <span class="text-success">Running on port 8888</span></p>
+                                    <p><strong>Last Scan:</strong> <span id="lastScan">--:--:--</span></p>
+                    <script>
+                        // Update last scan time periodically
+                        setInterval(function() {
+                            document.getElementById('lastScan').textContent = new Date().toLocaleTimeString();
+                        }, 1000);
+                    </script>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Connected Drones:</strong> <span id="connectedCount">{{ drones|selectattr('pixhawk_status', 'equalto', 'connected')|list|length }}</span></p>
+                                    <p><strong>Pixhawk Status:</strong> <span class="text-info">MAVLink Active</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drone Filters -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Status</label>
+                                    <select class="form-select" id="statusFilter" onchange="filterDrones()">
+                                        <option value="">All Statuses</option>
+                                        <option value="available">Available</option>
+                                        <option value="in_flight">In Flight</option>
+                                        <option value="maintenance">Maintenance</option>
+                                        <option value="offline">Offline</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Filter by Model</label>
+                                    <select class="form-select" id="modelFilter" onchange="filterDrones()">
+                                        <option value="">All Models</option>
+                                        <option value="MedDrone X1">MedDrone X1</option>
+                                        <option value="MedDrone X2">MedDrone X2</option>
+                                        <option value="MedDrone Pro">MedDrone Pro</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Search Drones</label>
+                                    <input type="text" class="form-control" id="searchInput" placeholder="Search by name or serial..." onkeyup="searchDrones()">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Actions</label>
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                            <i class="fas fa-times"></i> Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drones Table -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-drone"></i> Drone Fleet
+                                <span class="badge bg-primary ms-2" id="droneCount">{{ drones|length }}</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Drone</th>
+                                            <th>Model</th>
+                                            <th>Status</th>
+                                            <th>Battery</th>
+                                            <th>Location</th>
+                                            <th>Flights</th>
+                                            <th>Last Seen</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dronesTableBody">
+                                        {% for drone in drones %}
+                                        <tr data-drone-id="{{ drone.id }}" data-status="{{ drone.status }}" data-model="{{ drone.model }}">
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="drone-status-indicator bg-{{ 'success' if drone.status == 'available' else 'warning' if drone.status == 'in_flight' else 'danger' if drone.status == 'maintenance' else 'secondary' }} me-2"></div>
+                                                    <div>
+                                                        <div class="fw-bold">{{ drone.name }}</div>
+                                                        <small class="text-muted">{{ drone.serial_number }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {{ drone.model }}<br>
+                                                <small class="text-muted">{{ drone.max_payload }}kg payload</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ 'success' if drone.status == 'available' else 'warning' if drone.status == 'in_flight' else 'danger' if drone.status == 'maintenance' else 'secondary' }}">
+                                                    {{ drone.status.replace('_', ' ').title() }}
+                                                </span>
+                                                <br>
+                                                <small class="text-muted">{{ drone.pixhawk_status.title() }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="progress me-2" style="width: 60px; height: 20px;">
+                                                        <div class="progress-bar bg-{{ 'success' if drone.battery_level > 70 else 'warning' if drone.battery_level > 30 else 'danger' }}" 
+                                                             style="width: {{ drone.battery_level }}%"></div>
+                                                    </div>
+                                                    <span class="small">{{ drone.battery_level }}%</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if drone.location_lat and drone.location_lon %}
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="showDroneLocation({{ drone.location_lat }}, {{ drone.location_lon }})">
+                                                        <i class="fas fa-map-marker-alt"></i> View
+                                                    </button>
+                                                {% else %}
+                                                    <span class="text-muted">Unknown</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div>{{ drone.total_flights }} flights</div>
+                                                <small class="text-muted">{{ (drone.total_flight_time // 60) }}h {{ (drone.total_flight_time % 60) }}m</small>
+                                            </td>
+                                            <td>
+                                                <div>{{ drone.last_seen.strftime('%m/%d %H:%M') if drone.last_seen else 'Never' }}</div>
+                                                <small class="text-muted">{{ drone.updated_at.strftime('%Y-%m-%d') }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <button class="btn btn-outline-primary" onclick="viewDroneDetails({{ drone.id }})" title="Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary" onclick="configureDrone({{ drone.id }})" title="Configure">
+                                                        <i class="fas fa-cog"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-info" onclick="testDroneConnection({{ drone.id }})" title="Test Connection">
+                                                        <i class="fas fa-wifi"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-warning" onclick="scheduleMaintenance({{ drone.id }})" title="Maintenance">
+                                                        <i class="fas fa-wrench"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add Drone Modal -->
+<div class="modal fade" id="addDroneModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Drone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addDroneForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Drone Name</label>
+                                <input type="text" class="form-control" name="name" placeholder="e.g., SierraWings-04" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Model</label>
+                                <select class="form-select" name="model" required>
+                                    <option value="">Select model</option>
+                                    <option value="MedDrone X1">MedDrone X1</option>
+                                    <option value="MedDrone X2">MedDrone X2</option>
+                                    <option value="MedDrone Pro">MedDrone Pro</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Serial Number</label>
+                                <input type="text" class="form-control" name="serial_number" placeholder="SW-MD-XXX" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Max Payload (kg)</label>
+                                <input type="number" class="form-control" name="max_payload" step="0.1" min="0" max="10" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Flight Time (minutes)</label>
+                                <input type="number" class="form-control" name="flight_time" min="1" max="120" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Connection String</label>
+                                <input type="text" class="form-control" name="connection_string" placeholder="/dev/ttyUSB0 or IP:PORT">
+                                <div class="form-text">Pixhawk connection string</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Initial Location</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" name="location_lat" step="0.000001" placeholder="Latitude">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number" class="form-control" name="location_lon" step="0.000001" placeholder="Longitude">
+                            </div>
+                        </div>
+                        <div class="form-text">Leave empty to set automatically</div>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="auto_discover">
+                        <label class="form-check-label">Enable auto-discovery</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="createDrone()">Add Drone</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Drone Details Modal -->
+<div class="modal fade" id="droneDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Drone Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="droneDetailsContent">
+                <!-- Content loaded dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Discovery Results Modal -->
+<div class="modal fade" id="discoveryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Drone Discovery Results</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="discoveryResults">
+                <!-- Discovery results will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addDiscoveredDrones()">Add Selected Drones</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function filterDrones() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const modelFilter = document.getElementById('modelFilter').value;
+    
+    const rows = document.querySelectorAll('#dronesTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        if (statusFilter && row.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        if (modelFilter && row.dataset.model !== modelFilter) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    document.getElementById('droneCount').textContent = visibleCount;
+}
+
+function searchDrones() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#dronesTableBody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        const show = text.includes(searchTerm);
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    document.getElementById('droneCount').textContent = visibleCount;
+}
+
+function clearFilters() {
+    document.getElementById('statusFilter').value = '';
+    document.getElementById('modelFilter').value = '';
+    document.getElementById('searchInput').value = '';
+    
+    const rows = document.querySelectorAll('#dronesTableBody tr');
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+    
+    document.getElementById('droneCount').textContent = {{ drones|length }};
+}
+
+function showAddDroneModal() {
+    new bootstrap.Modal(document.getElementById('addDroneModal')).show();
+}
+
+function createDrone() {
+    const form = document.getElementById('addDroneForm');
+    const formData = new FormData(form);
+    
+    showAlert('Drone creation functionality would be implemented here', 'info');
+    bootstrap.Modal.getInstance(document.getElementById('addDroneModal')).hide();
+}
+
+function viewDroneDetails(droneId) {
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Drone Information</h6>
+                <p><strong>Drone ID:</strong> #${droneId}</p>
+                <p><strong>Model:</strong> MedDrone X1</p>
+                <p><strong>Serial:</strong> SW-MD-${String(droneId).padStart(3, '0')}</p>
+                <p><strong>Status:</strong> Available</p>
+                <p><strong>Max Payload:</strong> 2.5 kg</p>
+                <p><strong>Flight Time:</strong> 45 minutes</p>
+            </div>
+            <div class="col-md-6">
+                <h6>Current Status</h6>
+                <p><strong>Battery:</strong> 85%</p>
+                <p><strong>Location:</strong> Base Station</p>
+                <p><strong>Pixhawk:</strong> Connected</p>
+                <p><strong>Signal:</strong> 95%</p>
+                <p><strong>Last Flight:</strong> 2 hours ago</p>
+                <p><strong>Total Flights:</strong> 127</p>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <h6>Recent Activity</h6>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item">Mission #45 completed - 2 hours ago</div>
+                    <div class="list-group-item">Battery recharged to 100% - 3 hours ago</div>
+                    <div class="list-group-item">Mission #44 completed - 5 hours ago</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('droneDetailsContent').innerHTML = content;
+    new bootstrap.Modal(document.getElementById('droneDetailsModal')).show();
+}
+
+function configureDrone(droneId) {
+    showAlert('Drone configuration panel would open here', 'info');
+}
+
+function testDroneConnection(droneId) {
+    showAlert('Testing drone connection...', 'info');
+    
+    setTimeout(() => {
+        showAlert('Drone connection test completed successfully', 'success');
+    }, 2000);
+}
+
+function scheduleMaintenance(droneId) {
+    showAlert('Maintenance scheduling would be implemented here', 'info');
+}
+
+function showDroneLocation(lat, lon) {
+    showAlert(`Drone location: ${lat.toFixed(6)}, ${lon.toFixed(6)}`, 'info');
+}
+
+function discoverDrones() {
+    showAlert('Scanning for available drones...', 'info');
+    
+    setTimeout(() => {
+        const results = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Drone discovery scan completed. Found 2 new drones on the network.
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                            </th>
+                            <th>Name</th>
+                            <th>IP Address</th>
+                            <th>Status</th>
+                            <th>Battery</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" name="discoveredDrone" value="SW-AUTO-001"></td>
+                            <td>SW-AUTO-001</td>
+                            <td>192.168.1.101</td>
+                            <td><span class="badge bg-success">Connected</span></td>
+                            <td>92%</td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" name="discoveredDrone" value="SW-AUTO-002"></td>
+                            <td>SW-AUTO-002</td>
+                            <td>192.168.1.102</td>
+                            <td><span class="badge bg-success">Connected</span></td>
+                            <td>78%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        document.getElementById('discoveryResults').innerHTML = results;
+        new bootstrap.Modal(document.getElementById('discoveryModal')).show();
+    }, 3000);
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('input[name="discoveredDrone"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function addDiscoveredDrones() {
+    const selected = document.querySelectorAll('input[name="discoveredDrone"]:checked');
+    if (selected.length > 0) {
+        showAlert(`${selected.length} drone(s) added to fleet`, 'success');
+        bootstrap.Modal.getInstance(document.getElementById('discoveryModal')).hide();
+        setTimeout(() => {
+            location.reload();
+        }, 1000);
+    } else {
+        showAlert('Please select at least one drone to add', 'warning');
+    }
+}
+
+function refreshDrones() {
+    document.getElementById('lastScan').textContent = new Date().toLocaleTimeString();
+    location.reload();
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Auto-refresh discovery status every 30 seconds
+setInterval(() => {
+    document.getElementById('lastScan').textContent = new Date().toLocaleTimeString();
+}, 30000);
+</script>
+
+<style>
+.drone-status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.progress {
+    border: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}

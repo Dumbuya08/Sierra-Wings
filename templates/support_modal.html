@@ -1,0 +1,276 @@
+<!-- Support Modal -->
+<div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="supportModalLabel">
+                    <i class="fas fa-life-ring me-2"></i>Contact Support
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-envelope text-primary" style="font-size: 3rem;"></i>
+                    <h6 class="mt-2">Get Help & Support</h6>
+                    <p class="text-muted">We're here to help you with any questions or issues.</p>
+                </div>
+                
+                <div class="support-options">
+                    <div class="support-option">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-envelope text-primary me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Email Support</h6>
+                                <p class="text-muted mb-0">Send us your questions or feedback</p>
+                            </div>
+                        </div>
+                        <a href="mailto:sierrawingsofficial@gmail.com?subject=SierraWings Support Request" 
+                           class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-paper-plane me-2"></i>Contact Support
+                        </a>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="support-option">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-comment-dots text-success me-3"></i>
+                            <div>
+                                <h6 class="mb-1">User Feedback</h6>
+                                <p class="text-muted mb-0">Share your experience with us</p>
+                            </div>
+                        </div>
+                        <form id="quickFeedbackForm">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="feedbackMessage" rows="3" 
+                                          placeholder="Tell us about your experience..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <div class="rating-buttons">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rating-btn" data-rating="1">😟</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rating-btn" data-rating="2">😐</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rating-btn" data-rating="3">🙂</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rating-btn" data-rating="4">😊</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm rating-btn" data-rating="5">🤩</button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="fas fa-paper-plane me-2"></i>Send Feedback
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <div class="support-option">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-user-times text-danger me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Account Deletion</h6>
+                                <p class="text-muted mb-0">Request permanent account deletion</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" 
+                                data-bs-target="#accountDeletionModal" data-bs-dismiss="modal">
+                            <i class="fas fa-trash me-2"></i>Delete Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Account Deletion Modal -->
+{% include 'account_deletion_modal.html' %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle rating buttons
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    let selectedRating = 0;
+    
+    ratingButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            ratingButtons.forEach(btn => btn.classList.remove('btn-primary', 'btn-outline-secondary'));
+            ratingButtons.forEach(btn => btn.classList.add('btn-outline-secondary'));
+            
+            // Add active class to clicked button
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-primary');
+            
+            selectedRating = parseInt(this.dataset.rating);
+        });
+    });
+    
+    // Handle feedback form submission
+    document.getElementById('quickFeedbackForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = document.getElementById('feedbackMessage').value;
+        
+        if (!message.trim()) {
+            alert('Please enter your feedback message.');
+            return;
+        }
+        
+        // Create email body
+        const emailBody = `
+User Feedback:
+${message}
+
+Rating: ${selectedRating}/5 ${selectedRating > 0 ? ratingButtons[selectedRating-1].textContent : 'Not rated'}
+
+User: {{ current_user.username if current_user and current_user.is_authenticated else 'Anonymous' }}
+Role: {{ current_user.role if current_user and current_user.is_authenticated else 'Guest' }}
+Timestamp: ${new Date().toLocaleString()}
+        `;
+        
+        // Create mailto link
+        const mailtoLink = `mailto:sierrawingsofficial@gmail.com?subject=SierraWings Feedback&body=${encodeURIComponent(emailBody)}`;
+        
+        // Open email client
+        window.location.href = mailtoLink;
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('supportModal'));
+        modal.hide();
+        
+        // Reset form
+        this.reset();
+        ratingButtons.forEach(btn => btn.classList.remove('btn-primary', 'btn-outline-secondary'));
+        ratingButtons.forEach(btn => btn.classList.add('btn-outline-secondary'));
+        selectedRating = 0;
+        
+        // Show success message
+        alert('Thank you for your feedback! Your email client should open shortly.');
+    });
+    
+    // Check account deletion status
+    if ({{ current_user.is_authenticated|lower }}) {
+        fetch('/account_deletion_status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.has_request) {
+                    const deleteButton = document.querySelector('[data-bs-target="#accountDeletionModal"]');
+                    if (deleteButton) {
+                        deleteButton.innerHTML = '<i class="fas fa-clock me-2"></i>Request Pending';
+                        deleteButton.classList.remove('btn-outline-danger');
+                        deleteButton.classList.add('btn-outline-warning');
+                        deleteButton.disabled = true;
+                    }
+                }
+            });
+    }
+});
+</script>
+
+<style>
+.support-option {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-btn {
+    min-width: 2.5rem;
+    font-size: 1.2rem;
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle rating buttons
+    const ratingButtons = document.querySelectorAll('.rating-btn');
+    let selectedRating = 0;
+    
+    ratingButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            ratingButtons.forEach(btn => btn.classList.remove('btn-primary', 'btn-outline-secondary'));
+            ratingButtons.forEach(btn => btn.classList.add('btn-outline-secondary'));
+            
+            // Add active class to clicked button
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-primary');
+            
+            selectedRating = parseInt(this.dataset.rating);
+        });
+    });
+    
+    // Handle feedback form submission
+    document.getElementById('quickFeedbackForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = document.getElementById('feedbackMessage').value;
+        
+        if (!message.trim()) {
+            alert('Please enter your feedback message.');
+            return;
+        }
+        
+        // Create email body
+        const emailBody = `
+User Feedback:
+${message}
+
+Rating: ${selectedRating}/5 ${selectedRating > 0 ? ratingButtons[selectedRating-1].textContent : 'Not rated'}
+
+User: {{ current_user.username if current_user and current_user.is_authenticated else 'Anonymous' }}
+Role: {{ current_user.role if current_user and current_user.is_authenticated else 'Guest' }}
+Timestamp: ${new Date().toLocaleString()}
+        `;
+        
+        // Create mailto link
+        const mailtoLink = `mailto:sierrawingsofficial@gmail.com?subject=SierraWings Feedback&body=${encodeURIComponent(emailBody)}`;
+        
+        // Open email client
+        window.location.href = mailtoLink;
+        
+        // Close modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('supportModal'));
+        modal.hide();
+        
+        // Reset form
+        this.reset();
+        ratingButtons.forEach(btn => btn.classList.remove('btn-primary', 'btn-outline-secondary'));
+        ratingButtons.forEach(btn => btn.classList.add('btn-outline-secondary'));
+        selectedRating = 0;
+        
+        // Show success message
+        alert('Thank you for your feedback! Your email client should open shortly.');
+    });
+});
+</script>
+
+<style>
+.support-option {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.rating-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rating-btn {
+    min-width: 2.5rem;
+    font-size: 1.2rem;
+}
+</style>

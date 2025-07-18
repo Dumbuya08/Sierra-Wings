@@ -1,0 +1,183 @@
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileModalLabel">
+                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editProfileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="edit_first_name" name="first_name" 
+                                   value="{{ current_user.first_name or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="edit_last_name" name="last_name" 
+                                   value="{{ current_user.last_name or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="edit_username" name="username" 
+                                   value="{{ current_user.username }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="edit_email" name="email" 
+                                   value="{{ current_user.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="edit_phone" name="phone" 
+                               value="{{ current_user.phone or '' }}" placeholder="+232 XX XXX XXXX">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_address" class="form-label">Address</label>
+                        <textarea class="form-control" id="edit_address" name="address" rows="3" 
+                                  placeholder="Enter your address">{{ current_user.address or '' }}</textarea>
+                    </div>
+                    
+                    {% if current_user.role == 'patient' %}
+                    <div class="mb-3">
+                        <label for="edit_emergency_contact" class="form-label">Emergency Contact</label>
+                        <input type="text" class="form-control" id="edit_emergency_contact" name="emergency_contact" 
+                               value="{{ current_user.emergency_contact or '' }}" placeholder="Emergency contact name and phone">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_allergies" class="form-label">Allergies</label>
+                        <textarea class="form-control" id="edit_allergies" name="allergies" rows="2" 
+                                  placeholder="List any allergies">{{ current_user.allergies or '' }}</textarea>
+                    </div>
+                    {% endif %}
+                    
+                    {% if current_user.role == 'clinic' %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_clinic_name" class="form-label">Clinic Name</label>
+                            <input type="text" class="form-control" id="edit_clinic_name" name="clinic_name" 
+                                   value="{{ current_user.clinic_name or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_clinic_license" class="form-label">License Number</label>
+                            <input type="text" class="form-control" id="edit_clinic_license" name="clinic_license" 
+                                   value="{{ current_user.clinic_license or '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_specialization" class="form-label">Specialization</label>
+                        <input type="text" class="form-control" id="edit_specialization" name="specialization" 
+                               value="{{ current_user.specialization or '' }}" placeholder="e.g., General Medicine, Pediatrics">
+                    </div>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <h6>Change Password (Optional)</h6>
+                    <div class="mb-3">
+                        <label for="edit_current_password" class="form-label">Current Password</label>
+                        <input type="password" class="form-control" id="edit_current_password" name="current_password" 
+                               placeholder="Enter current password to change">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_new_password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="edit_new_password" name="new_password" 
+                                   placeholder="Enter new password">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_confirm_password" class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" id="edit_confirm_password" name="confirm_password" 
+                                   placeholder="Confirm new password">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('editProfileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    
+    // Convert FormData to object
+    for (let [key, value] of formData.entries()) {
+        data[key] = value;
+    }
+    
+    // Validate password change if provided
+    if (data.current_password && data.new_password) {
+        if (data.new_password !== data.confirm_password) {
+            alert('New passwords do not match');
+            return;
+        }
+        if (data.new_password.length < 6) {
+            alert('New password must be at least 6 characters long');
+            return;
+        }
+    }
+    
+    // Show loading state
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+    
+    fetch('/update_profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Profile updated successfully!');
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
+            modal.hide();
+            
+            // Refresh page to show updated info
+            window.location.reload();
+        } else {
+            alert('Error updating profile: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating profile. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Changes';
+    });
+});
+</script>

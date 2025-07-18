@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}SierraWings - Emergency Medical Drone Delivery{% endblock %}
+
+{% block head %}
+<script>
+// Initialize hero map when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof L !== 'undefined') {
+        const heroMap = L.map('hero-map', {
+            center: [8.4606, -11.7799], // Sierra Leone coordinates
+            zoom: 8,
+            zoomControl: false,
+            scrollWheelZoom: false,
+            dragging: false,
+            touchZoom: false,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(heroMap);
+
+        // Add some sample drone markers
+        const droneIcon = L.divIcon({
+            html: '<i class="fas fa-drone" style="color: #2196F3; font-size: 20px;"></i>',
+            iconSize: [30, 30],
+            className: 'drone-marker'
+        });
+
+        const hospitalIcon = L.divIcon({
+            html: '<i class="fas fa-hospital" style="color: #FFC107; font-size: 20px;"></i>',
+            iconSize: [30, 30],
+            className: 'hospital-marker'
+        });
+
+        // Add markers
+        L.marker([8.4606, -11.7799], {icon: droneIcon}).addTo(heroMap);
+        L.marker([8.4900, -11.7500], {icon: hospitalIcon}).addTo(heroMap);
+        L.marker([8.4300, -11.8000], {icon: hospitalIcon}).addTo(heroMap);
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-heartbeat me-2"></i>Emergency Medical Delivery
+                </h1>
+                <p class="lead mb-4">SierraWings provides rapid, reliable medical drone delivery services across Sierra Leone. Get life saving medications delivered directly to your location.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-emergency btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Get Started
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="map-container">
+                    <div id="hero-map" style="height: 300px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-4">
+    <div class="container">
+        <h2 class="text-center mb-4 fw-bold">
+            <i class="fas fa-user-md me-2"></i>Why Choose SierraWings?
+        </h2>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="medical-feature text-center">
+                    <div class="medical-feature-icon mb-2">
+                        <i class="fas fa-ambulance"></i>
+                    </div>
+                    <h6 class="medical-feature-title">Emergency Response</h6>
+                    <p class="medical-feature-description small">Critical medical deliveries in under 30 minutes.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="medical-feature text-center">
+                    <div class="medical-feature-icon mb-2">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h6 class="medical-feature-title">Live Medical Tracking</h6>
+                    <p class="medical-feature-description small">Real time GPS tracking with live telemetry.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="medical-feature text-center">
+                    <div class="medical-feature-icon mb-2">
+                        <i class="fas fa-shield-virus"></i>
+                    </div>
+                    <h6 class="medical-feature-title">Medical Grade Security</h6>
+                    <p class="medical-feature-description small">Temperature controlled medical cargo bay.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- How It Works Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">How It Works</h2>
+        <div class="row">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="process-step text-center">
+                    <div class="step-number">1</div>
+                    <h6>Request</h6>
+                    <p class="small">Submit request</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="process-step text-center">
+                    <div class="step-number">2</div>
+                    <h6>Approval</h6>
+                    <p class="small">Medical review</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="process-step text-center">
+                    <div class="step-number">3</div>
+                    <h6>Dispatch</h6>
+                    <p class="small">Drone delivery</p>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="process-step text-center">
+                    <div class="step-number">4</div>
+                    <h6>Delivery</h6>
+                    <p class="small">Secure arrival</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Follow Us Section -->
+<section class="py-4">
+    <div class="container">
+        <h2 class="text-center mb-4">Follow Us</h2>
+        <div class="d-flex justify-content-center gap-4">
+            <a href="https://www.tiktok.com/@sierrawingsofficial" target="_blank" class="social-icon">
+                <i class="fab fa-tiktok"></i>
+            </a>
+            <a href="https://www.instagram.com/sierrawingsofficial" target="_blank" class="social-icon">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://x.com/sierrawingsofficial" target="_blank" class="social-icon">
+                <span class="x-icon">𝕏</span>
+            </a>
+            <a href="https://whatsapp.com/channel/0029Vb5diMZCcW4tl18Biv17" target="_blank" class="social-icon">
+                <i class="fab fa-whatsapp"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+
+<!-- CTA Section -->
+<section class="py-4">
+    <div class="container text-center">
+        <h3 class="mb-3">Ready to Get Started?</h3>
+        <p class="mb-4">Join thousands of patients and healthcare providers using SierraWings.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus me-2"></i>Register Now
+            </a>
+            <a href="https://chat.whatsapp.com/DNVfWh3a5BQ2FWhvpJArgc" class="btn btn-success btn-lg" target="_blank">
+                <i class="fab fa-whatsapp me-2"></i>Join Community
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const target = this.getAttribute('href');
+            if (target !== '#') {
+                e.preventDefault();
+                const targetElement = document.querySelector(target);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    });
+
+    // Auto-refresh statistics every 30 seconds
+    function refreshStats() {
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('deliveries-stat').textContent = data.successful_deliveries;
+                document.getElementById('delivery-time-stat').textContent = data.average_delivery_time;
+                document.getElementById('success-rate-stat').textContent = data.success_rate;
+            })
+            .catch(error => {
+                console.log('Statistics refresh error:', error);
+            });
+    }
+
+    // Refresh stats every 30 seconds
+    setInterval(refreshStats, 30000);
+
+    // Social media link styling
+    document.addEventListener('DOMContentLoaded', function() {
+        const socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}
