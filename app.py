@@ -10,6 +10,7 @@ from mail_service import mail, init_mail
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
+# Database model base
 class Base(DeclarativeBase):
     pass
 
@@ -19,7 +20,7 @@ login_manager = LoginManager()
 
 # Create Flask app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "sierrawings-emergency-medical-delivery-2025")
+app.secret_key = os.environ.get("SESSION_SECRET", "default-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Configure database
@@ -30,25 +31,23 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 }
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Route to home
-@app.route("/")
-def home():
-    return render_template('index.html')  # Make sure templates/index.html exists
-
 # Initialize extensions with app
 db.init_app(app)
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
-
-# Initialize Flask-Mail
 init_mail(app)
 
-# User loader for Flask-Login
+# User loader
 @login_manager.user_loader
 def load_user(user_id):
-    from models import User
+    from models import User  # Make sure models.py exists!
     return User.query.get(int(user_id))
+
+# Home route
+@app.route("/")
+def home():
+    return render_template('index.html')  # Make sure templates/index.html exists!
 
 # Register blueprints
 def register_blueprints():
@@ -67,16 +66,15 @@ def register_blueprints():
     app.register_blueprint(voice_checklist)
     app.register_blueprint(feedback_bp)
 
-# Function to initialize database structure
-def init_database():
+# Init DB and blueprints
+with app.app_context():
     import models
     import models_extensions
     db.create_all()
     register_blueprints()
-    logging.info("SierraWings database initialized for production")
+    logging.info("SierraWings initialized successfully.")
 
-# Run the app
+# Run app
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))
-    register_blueprints()
     app.run(host='0.0.0.0', port=port)
