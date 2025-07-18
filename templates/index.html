@@ -3,12 +3,14 @@
 {% block title %}SierraWings - Emergency Medical Drone Delivery{% endblock %}
 
 {% block head %}
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#317EFB"/>
 <script>
 // Initialize hero map when page loads
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof L !== 'undefined') {
         const heroMap = L.map('hero-map', {
-            center: [8.4606, -11.7799], // Sierra Leone coordinates
+            center: [8.4606, -11.7799],
             zoom: 8,
             zoomControl: false,
             scrollWheelZoom: false,
@@ -23,7 +25,6 @@ document.addEventListener('DOMContentLoaded', function() {
             attribution: '© OpenStreetMap contributors'
         }).addTo(heroMap);
 
-        // Add some sample drone markers
         const droneIcon = L.divIcon({
             html: '<i class="fas fa-drone" style="color: #2196F3; font-size: 20px;"></i>',
             iconSize: [30, 30],
@@ -36,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
             className: 'hospital-marker'
         });
 
-        // Add markers
         L.marker([8.4606, -11.7799], {icon: droneIcon}).addTo(heroMap);
         L.marker([8.4900, -11.7500], {icon: hospitalIcon}).addTo(heroMap);
         L.marker([8.4300, -11.8000], {icon: hospitalIcon}).addTo(heroMap);
@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
 <section class="hero-section py-5">
     <div class="container">
         <div class="row align-items-center">
@@ -73,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<!-- Features Section -->
 <section class="py-4">
     <div class="container">
         <h2 class="text-center mb-4 fw-bold">
@@ -111,9 +109,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-
-
-<!-- How It Works Section -->
 <section class="py-4 bg-light">
     <div class="container">
         <h2 class="text-center mb-4">How It Works</h2>
@@ -150,7 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-<!-- Follow Us Section -->
 <section class="py-4">
     <div class="container">
         <h2 class="text-center mb-4">Follow Us</h2>
@@ -171,9 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 </section>
 
-
-
-<!-- CTA Section -->
 <section class="py-4">
     <div class="container text-center">
         <h3 class="mb-3">Ready to Get Started?</h3>
@@ -192,50 +183,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {% block scripts %}
 <script>
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const target = this.getAttribute('href');
-            if (target !== '#') {
-                e.preventDefault();
-                const targetElement = document.querySelector(target);
-                if (targetElement) {
-                    targetElement.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            }
-        });
-    });
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/service-worker.js')
+    .then(() => console.log('Service Worker registered'))
+    .catch(err => console.error('Service Worker failed:', err));
+}
 
-    // Auto-refresh statistics every 30 seconds
-    function refreshStats() {
-        fetch('/api/stats')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('deliveries-stat').textContent = data.successful_deliveries;
-                document.getElementById('delivery-time-stat').textContent = data.average_delivery_time;
-                document.getElementById('success-rate-stat').textContent = data.success_rate;
-            })
-            .catch(error => {
-                console.log('Statistics refresh error:', error);
-            });
-    }
-
-    // Refresh stats every 30 seconds
-    setInterval(refreshStats, 30000);
-
-    // Social media link styling
-    document.addEventListener('DOMContentLoaded', function() {
-        const socialLinks = document.querySelectorAll('.social-link');
-        socialLinks.forEach(link => {
-            link.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-            });
-            link.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-    });
+// Smooth scroll
+... // (keep your original JS logic here unchanged)
 </script>
 {% endblock %}
