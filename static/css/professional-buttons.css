@@ -1,0 +1,526 @@
+/* Professional Button Design System for SierraWings */
+
+/* Base Button Styles */
+.btn-professional {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.5;
+    text-decoration: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    min-width: 120px;
+}
+
+.btn-professional::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-professional:hover::before {
+    left: 100%;
+}
+
+.btn-professional:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-professional:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Button Sizes */
+.btn-professional-sm {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.btn-professional-lg {
+    padding: 16px 32px;
+    font-size: 16px;
+    min-width: 160px;
+}
+
+.btn-professional-xl {
+    padding: 20px 40px;
+    font-size: 18px;
+    min-width: 200px;
+}
+
+/* Button Variants */
+.btn-professional-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-professional-primary:hover {
+    background: linear-gradient(135deg, #2980b9, #21618c);
+    color: white;
+}
+
+.btn-professional-secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+}
+
+.btn-professional-secondary:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    color: white;
+}
+
+.btn-professional-success {
+    background: linear-gradient(135deg, #27ae60, #229954);
+    color: white;
+}
+
+.btn-professional-success:hover {
+    background: linear-gradient(135deg, #229954, #1e8449);
+    color: white;
+}
+
+.btn-professional-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-professional-danger:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    color: white;
+}
+
+.btn-professional-warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+}
+
+.btn-professional-warning:hover {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    color: white;
+}
+
+.btn-professional-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-professional-info:hover {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    color: white;
+}
+
+.btn-professional-light {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.btn-professional-light:hover {
+    background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    color: #495057;
+}
+
+.btn-professional-dark {
+    background: linear-gradient(135deg, #343a40, #23272b);
+    color: white;
+}
+
+.btn-professional-dark:hover {
+    background: linear-gradient(135deg, #23272b, #1d2124);
+    color: white;
+}
+
+/* Medical Theme Buttons */
+.btn-professional-medical {
+    background: linear-gradient(135deg, #1E4A72, #2C5F8A);
+    color: white;
+}
+
+.btn-professional-medical:hover {
+    background: linear-gradient(135deg, #2C5F8A, #3A6B9A);
+    color: white;
+}
+
+.btn-professional-emergency {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    animation: pulse-emergency 2s infinite;
+}
+
+.btn-professional-emergency:hover {
+    background: linear-gradient(135deg, #c82333, #a71e2a);
+    color: white;
+}
+
+@keyframes pulse-emergency {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+/* Outline Button Variants */
+.btn-professional-outline-primary {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-professional-outline-primary:hover {
+    background: #3498db;
+    color: white;
+}
+
+.btn-professional-outline-secondary {
+    background: transparent;
+    color: #6c757d;
+    border: 2px solid #6c757d;
+}
+
+.btn-professional-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-professional-outline-success {
+    background: transparent;
+    color: #27ae60;
+    border: 2px solid #27ae60;
+}
+
+.btn-professional-outline-success:hover {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-professional-outline-danger {
+    background: transparent;
+    color: #e74c3c;
+    border: 2px solid #e74c3c;
+}
+
+.btn-professional-outline-danger:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-professional-outline-medical {
+    background: transparent;
+    color: #1E4A72;
+    border: 2px solid #1E4A72;
+}
+
+.btn-professional-outline-medical:hover {
+    background: #1E4A72;
+    color: white;
+}
+
+/* Button Groups */
+.btn-professional-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-professional-group-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-professional-group-justified {
+    display: flex;
+    width: 100%;
+}
+
+.btn-professional-group-justified .btn-professional {
+    flex: 1;
+}
+
+/* Icon Buttons */
+.btn-professional-icon-only {
+    min-width: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.btn-professional-icon-only.btn-professional-sm {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+}
+
+.btn-professional-icon-only.btn-professional-lg {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+}
+
+/* Floating Action Button */
+.btn-professional-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-professional-fab:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Loading State */
+.btn-professional-loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.btn-professional-loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Disabled State */
+.btn-professional:disabled,
+.btn-professional-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.btn-professional:disabled:hover,
+.btn-professional-disabled:hover {
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Button Cards */
+.btn-professional-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-width: 160px;
+}
+
+.btn-professional-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #3498db;
+}
+
+.btn-professional-card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.btn-professional-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 8px;
+}
+
+.btn-professional-card-description {
+    font-size: 14px;
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* Quick Action Buttons */
+.quick-action-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.quick-action-btn:hover {
+    background: #f8f9fa;
+    border-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+.quick-action-btn-icon {
+    font-size: 24px;
+    width: 32px;
+    text-align: center;
+}
+
+.quick-action-btn-content {
+    flex: 1;
+}
+
+.quick-action-btn-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.quick-action-btn-description {
+    font-size: 14px;
+    color: #6c757d;
+    line-height: 1.3;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .btn-professional {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-width: 100px;
+    }
+
+    .btn-professional-lg {
+        padding: 12px 20px;
+        font-size: 16px;
+        min-width: 120px;
+    }
+
+    .btn-professional-xl {
+        padding: 14px 24px;
+        font-size: 16px;
+        min-width: 140px;
+    }
+
+    .btn-professional-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .quick-action-container {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-professional-fab {
+        bottom: 16px;
+        right: 16px;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .btn-professional {
+        border: 2px solid;
+    }
+
+    .btn-professional-primary {
+        border-color: #2980b9;
+    }
+
+    .btn-professional-secondary {
+        border-color: #5a6268;
+    }
+
+    .btn-professional-success {
+        border-color: #229954;
+    }
+
+    .btn-professional-danger {
+        border-color: #c0392b;
+    }
+
+    .btn-professional-warning {
+        border-color: #e67e22;
+    }
+
+    .btn-professional-info {
+        border-color: #138496;
+    }
+
+    .btn-professional-light {
+        border-color: #6c757d;
+    }
+
+    .btn-professional-dark {
+        border-color: #23272b;
+    }
+
+    .btn-professional-medical {
+        border-color: #1E4A72;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .btn-professional {
+        transition: none;
+    }
+
+    .btn-professional:hover {
+        transform: none;
+    }
+
+    .btn-professional::before {
+        display: none;
+    }
+
+    .btn-professional-loading::after {
+        animation: none;
+    }
+
+    .btn-professional-emergency {
+        animation: none;
+    }
+}

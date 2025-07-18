@@ -1,0 +1,83 @@
+// backend/email.js
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "SierraWingsOfficial@gmail.com",
+    pass: "your_app_password_here", // Use Gmail App Password
+M208002074#  },
+});
+
+const sendFeedbackEmail = async ({ name, email, message }) => {
+  await transporter.sendMail({
+    from: email,
+    to: "SierraWingsOfficial@gmail.com",
+    subject: `Sierrawings Feedback from ${name}`,
+    text: message,
+  });
+};
+
+module.exports = { sendFeedbackEmail };
+// backend/index.js
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { sendFeedbackEmail } = require("./email");
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(bodyParser.json());
+
+app.post("/api/feedback", async (req, res) => {
+  const { name, email, message } = req.body;
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "All fields are required." });
+  }
+
+  try {
+    await sendFeedbackEmail({ name, email, message });
+    res.status(200).json({ success: true, message: "Feedback sent." });
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Failed to send email." });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+<!-- public/index.html -->
+<form id="feedbackForm">
+  <input type="text" id="name" placeholder="Your name" required />
+  <input type="email" id="email" placeholder="Your email" required />
+  <textarea id="message" placeholder="Your message" required></textarea>
+  <button type="submit">Send Feedback</button>
+</form>
+
+<script>
+document.getElementById("feedbackForm").onsubmit = async function (e) {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    message: document.getElementById("message").value,
+  };
+
+  const res = await fetch("http://localhost:5000/api/feedback", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const result = await res.json();
+  alert(result.message || "Feedback submitted.");
+};
+</script>
+GMAIL_USER=SierraWingsOfficial@gmail.com
+GMAIL_PASS=M208002074#
+✅ Set up a backend API for feedback
+✅ Use your Gmail (SierraWingsOfficial@gmail.com) to receive all messages
+✅ Automatically send email when a user submits feedback from the app
+The email password is M208002074#

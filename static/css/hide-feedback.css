@@ -1,0 +1,57 @@
+/* 
+ * Hide all feedback buttons and widgets by user request
+ * This CSS file ensures no feedback buttons appear anywhere in the application
+ */
+
+/* Hide floating feedback buttons */
+.floating-feedback-button,
+#floating-feedback-btn,
+.emoji-feedback-widget,
+.emoji-feedback-trigger {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Hide quick feedback sections */
+.quick-feedback-form,
+.quick-feedback-widget,
+[data-feedback="quick"],
+[class*="quick-feedback"],
+[id*="quick-feedback"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide feedback tooltips */
+.feedback-tooltip,
+.feedback-text {
+    display: none !important;
+}
+
+/* Hide emoji feedback options */
+.emoji-feedback-options,
+.emoji-option {
+    display: none !important;
+}
+
+/* Hide any button with "feedback" in the text */
+button:contains("Quick Feedback"),
+button:contains("Feedback"),
+a:contains("Quick Feedback") {
+    display: none !important;
+}
+
+/* Hide feedback modal components */
+#floatingFeedbackModal .modal-title:contains("Quick Feedback") {
+    display: none !important;
+}
+
+/* Additional safety measures - hide by common feedback class patterns */
+.feedback-widget,
+.feedback-button,
+.feedback-trigger,
+.feedback-floating {
+    display: none !important;
+}

@@ -1,0 +1,54 @@
+6. [MAINTENANCE MODE DISPLAY]  
+• If the system is in maintenance mode, show a full-screen banner/message to all users until resolved  
+
+---
+
+7. [DRONE MANAGEMENT & WIRELESS CONNECTION]  
+• On Admin → Manage Drones, fix all action buttons: Add, Edit, Remove, Launch, Land  
+• Add a **Wireless Connection** button to link drones (Raspberry Pi + Pixhawk) over Wi-Fi or cellular  
+• Show real-time connection status on the dashboard  
+
+---
+
+8. [WIDGETS & QUICK ACTIONS]  
+• Remove the old quick action buttons (3 legacy ones)  
+• Make all widgets (Weather, Deliveries, Alerts, Drone Status, etc.) **fully functional and live (no demo)**  
+• **All widgets in all 3 modes must be minimized by default**, and expandable with a "+" icon  
+• Fix any widget errors (especially “500 internal server error”)  
+
+---
+
+9. [WEATHER WIDGET]  
+• Use a real-time weather API (with wind speed included)  
+• Auto-refresh the weather widget every 30 seconds  
+• Completely remove placeholder/demo content  
+
+---
+
+10. [GENERAL FIXES & SETTINGS]  
+• Remove the “Admin Action” widget if not necessary  
+• Fix the “Drone Management” button in the header across the app  
+• Make sure all Help buttons open correct dialogs or support info  
+• Fix “Save Settings” button in all modes so it actually saves and applies settings  
+
+---
+
+11. [MANAGE USERS]  
+• On Admin → Manage Users, fix all action buttons (View, Edit, Delete, etc.)
+
+---
+
+12. [SOCIAL MEDIA LINKS ON HOMEPAGE]  
+• Display the following social links clearly on the homepage:  
+   - **TikTok**: [www.tiktok.com/@sierrawings01](https://www.tiktok.com/@sierrawings01)  
+   - **X (Twitter)**: [https://x.com/elitecraft58057?s=11](https://x.com/elitecraft58057?s=11)  
+   - **WhatsApp**: Show the word **“WhatsApp”**, and directly below it show the link:  
+     [https://chat.whatsapp.com/DNVfWh3a5BQ2FWhvpJArgc](https://chat.whatsapp.com/DNVfWh3a5BQ2FWhvpJArgc)  
+     ⚠️ Do **not** include the white WhatsApp “Join Group” box — just display the link cleanly as text  
+
+---
+
+13. [RESPONSIVE & MOBILE-FRIENDLY DESIGN]  
+• The app must be fully responsive and work well on all screen sizes (desktop, tablet, and mobile)  
+• Ensure smooth resizing and scaling of UI components, maps, buttons, and widgets  
+• Floating buttons (e.g., feedback) should also be usable on mobile  

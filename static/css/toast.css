@@ -1,0 +1,240 @@
+/* Toast Notification Styles for SierraWings */
+
+.toast-container {
+    z-index: 9999;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    max-width: 90vw;
+}
+
+.toast {
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast.bg-success {
+    background-color: rgba(40, 167, 69, 0.95) !important;
+    border-color: rgba(40, 167, 69, 0.3);
+}
+
+.toast.bg-info {
+    background-color: rgba(23, 162, 184, 0.95) !important;
+    border-color: rgba(23, 162, 184, 0.3);
+}
+
+.toast.bg-warning {
+    background-color: rgba(255, 193, 7, 0.95) !important;
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #000 !important;
+}
+
+.toast.bg-danger {
+    background-color: rgba(220, 53, 69, 0.95) !important;
+    border-color: rgba(220, 53, 69, 0.3);
+}
+
+.toast.bg-danger.border-warning {
+    border-color: #ffc107 !important;
+    border-width: 2px !important;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
+.toast-body {
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+}
+
+.toast-body i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.toast .btn-close {
+    padding: 8px;
+    margin: 8px 8px 8px 0;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.toast .btn-close:hover {
+    opacity: 1;
+}
+
+.toast .btn-close-white {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.toast.bg-warning .btn-close {
+    filter: invert(1) grayscale(100%) brightness(0%);
+}
+
+/* Animation for toast entrance */
+.toast.showing {
+    animation: toast-slide-in 0.3s ease-out;
+}
+
+.toast.hide {
+    animation: toast-slide-out 0.3s ease-in;
+}
+
+@keyframes toast-slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toast-slide-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Critical message special styling */
+.toast.bg-danger.border-warning {
+    position: relative;
+}
+
+.toast.bg-danger.border-warning::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #ffc107, #dc3545, #ffc107);
+    border-radius: 10px;
+    z-index: -1;
+    animation: critical-pulse 2s infinite;
+}
+
+@keyframes critical-pulse {
+    0%, 100% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+    
+    .toast {
+        margin-bottom: 8px;
+    }
+    
+    .toast-body {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+}
+
+/* Dark theme compatibility */
+[data-bs-theme="dark"] .toast {
+    background-color: rgba(33, 37, 41, 0.95) !important;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-bs-theme="dark"] .toast.bg-success {
+    background-color: rgba(25, 135, 84, 0.95) !important;
+}
+
+[data-bs-theme="dark"] .toast.bg-info {
+    background-color: rgba(13, 110, 253, 0.95) !important;
+}
+
+[data-bs-theme="dark"] .toast.bg-warning {
+    background-color: rgba(255, 193, 7, 0.95) !important;
+    color: #000 !important;
+}
+
+[data-bs-theme="dark"] .toast.bg-danger {
+    background-color: rgba(220, 53, 69, 0.95) !important;
+}
+
+/* Hide original flash messages when toasts are enabled */
+.alert.d-none {
+    display: none !important;
+}
+
+/* Loading state for toast buttons */
+.toast-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.toast-loading .btn-close {
+    display: none;
+}
+
+/* Success icon animation */
+.toast.bg-success .fa-check-circle {
+    animation: success-bounce 0.6s ease-out;
+}
+
+@keyframes success-bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: scale(1);
+    }
+    40%, 43% {
+        transform: scale(1.1);
+    }
+    70% {
+        transform: scale(1.05);
+    }
+}
+
+/* Error icon animation */
+.toast.bg-danger .fa-exclamation-circle {
+    animation: error-shake 0.5s ease-out;
+}
+
+@keyframes error-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    20%, 60% {
+        transform: translateX(-2px);
+    }
+    40%, 80% {
+        transform: translateX(2px);
+    }
+}
+
+/* Warning icon animation */
+.toast.bg-warning .fa-exclamation-triangle {
+    animation: warning-pulse 1s ease-in-out infinite;
+}
+
+@keyframes warning-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}

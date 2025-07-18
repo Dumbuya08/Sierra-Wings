@@ -1,0 +1,1275 @@
+/* SierraWings Medical Theme */
+:root {
+    /* Professional Color Palette - Satisfying Colors */
+    --primary-color: #2980B9;        /* Professional Blue */
+    --secondary-color: #3498DB;      /* Medium Blue */
+    --accent-color: #5DADE2;         /* Light Blue */
+    --header-color: #1A252F;         /* Deep Charcoal Blue */
+    --success-color: #28A745;        /* Medical Green */
+    --warning-color: #FFC107;        /* Medical Yellow */
+    --danger-color: #DC3545;         /* Medical Red */
+    --info-color: #17A2B8;           /* Medical Cyan */
+    
+    /* Neutral Colors - Comfortable Reading */
+    --background-color: #F8FAFB;     /* Light Gray Background */
+    --card-background: #FFFFFF;      /* Pure White Cards */
+    --text-primary: #2C3E50;         /* Dark Blue Gray Text */
+    --text-secondary: #34495E;       /* Medium Blue Gray Text */
+    --text-muted: #5D6D7E;           /* Light Blue Gray Text */
+    --border-color: #E2E8F0;         /* Light Gray Borders */
+    
+    /* Medical Specific - Sky Blue Theme */
+    --medical-blue: #2980B9;         /* Darker Sky Blue */
+    --medical-green: #28A745;        /* Medical Green */
+    --medical-red: #DC3545;          /* Medical Emergency Red */
+    --medical-gray: #F8FAFB;         /* Light Medical Gray */
+    
+    /* Typography */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-base: 16px;
+    --line-height-base: 1.6;
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 3rem;
+    
+    /* Border Radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Base Styles - Mobile App */
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    color: var(--text-primary);
+    background: linear-gradient(135deg, 
+        rgba(41, 128, 185, 0.08) 0%, 
+        rgba(52, 152, 219, 0.08) 25%, 
+        rgba(46, 204, 113, 0.08) 50%, 
+        rgba(142, 68, 173, 0.08) 75%, 
+        rgba(231, 76, 60, 0.08) 100%),
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="medical-pattern" patternUnits="userSpaceOnUse" width="30" height="30"><rect width="30" height="30" fill="%23f8f9fa"/><g opacity="0.05"><path d="M15 5v8h8v4h-8v8h-4v-8H3v-4h8V5z" fill="%232980B9"/><circle cx="7" cy="7" r="1" fill="%2327AE60"/><circle cx="23" cy="7" r="1" fill="%23E74C3C"/><circle cx="7" cy="23" r="1" fill="%23F39C12"/><circle cx="23" cy="23" r="1" fill="%239B59B6"/></g></pattern></defs><rect width="100" height="100" fill="url(%23medical-pattern)"/></svg>');
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+/* Enhanced card backgrounds for better text readability */
+.card {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Social Media Buttons */
+.btn-outline-light {
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+}
+
+.btn-outline-light:focus {
+    box-shadow: 0 0 0 0.2rem rgba(41, 128, 185, 0.25);
+}
+
+/* Social Media Icons */
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.social-icon:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.social-icon i {
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+/* TikTok Icon */
+.social-icon .fa-tiktok {
+    color: #000000;
+}
+
+.social-icon:hover .fa-tiktok {
+    color: #000000;
+}
+
+/* Instagram Icon */
+.social-icon .fa-instagram {
+    color: #E4405F;
+}
+
+.social-icon:hover .fa-instagram {
+    color: #E4405F;
+}
+
+/* X (Twitter) Icon */
+.social-icon .x-icon {
+    color: #000000;
+    font-size: 24px;
+    font-weight: bold;
+    font-family: "Twitter Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover .x-icon {
+    color: #000000;
+    transform: scale(1.1);
+}
+
+/* WhatsApp Icon */
+.social-icon .fa-whatsapp {
+    color: #25D366;
+}
+
+.social-icon:hover .fa-whatsapp {
+    color: #25D366;
+}
+
+/* Mobile Optimized Homepage Styles */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 0 !important;
+    }
+    
+    .hero-section h1 {
+        font-size: 2rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .hero-section p {
+        font-size: 1rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .features-section {
+        padding: 2rem 0 !important;
+    }
+    
+    .features-section h2 {
+        font-size: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .medical-feature {
+        margin-bottom: 1.5rem !important;
+    }
+    
+    .medical-feature-icon {
+        font-size: 2rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .medical-feature-title {
+        font-size: 1rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .medical-feature-description {
+        font-size: 0.9rem !important;
+    }
+    
+    .process-step {
+        margin-bottom: 1rem !important;
+    }
+    
+    .step-number {
+        font-size: 1.5rem !important;
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        margin: 0 auto 0.5rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.9rem !important;
+    }
+    
+    .display-5 {
+        font-size: 2rem !important;
+    }
+    
+    .lead {
+        font-size: 1rem !important;
+    }
+    
+    section {
+        padding: 2rem 0 !important;
+    }
+    
+    .container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    /* Mobile Social Media Buttons */
+    .footer .d-flex.gap-3 {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+    }
+    
+    .btn-outline-light.btn-sm {
+        width: 100% !important;
+        max-width: 200px !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Hero Section Buttons - Keep side by side */
+    .hero-section .d-flex.gap-3 {
+        flex-direction: row !important;
+        gap: 0.5rem !important;
+        justify-content: center !important;
+        flex-wrap: nowrap !important;
+    }
+    
+    .hero-section .btn-lg {
+        flex: 1 !important;
+        max-width: 130px !important;
+        font-size: 0.8rem !important;
+        padding: 0.5rem 0.75rem !important;
+        white-space: nowrap !important;
+    }
+    
+    /* Mobile Social Media Icons */
+    .social-icon {
+        width: 50px !important;
+        height: 50px !important;
+    }
+    
+    .social-icon i {
+        font-size: 20px !important;
+    }
+    
+    .social-icon .x-icon {
+        font-size: 20px !important;
+    }
+    
+    .d-flex.gap-4 {
+        gap: 1rem !important;
+    }
+}
+
+.navbar {
+    background-color: rgba(26, 37, 47, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-section {
+    background: linear-gradient(135deg, 
+        rgba(41, 128, 185, 0.9) 0%, 
+        rgba(52, 152, 219, 0.9) 100%);
+    backdrop-filter: blur(5px);
+}
+
+.description-highlight {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.medical-feature {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar {
+    background: rgba(26, 37, 47, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.footer {
+    background: rgba(26, 37, 47, 0.95);
+    backdrop-filter: blur(10px);
+}
+        url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%231E4A72' fill-opacity='0.02'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: manipulation;
+    min-height: 100vh;
+}
+
+/* Mobile App Touch Optimization */
+* {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Allow text selection for inputs and content */
+input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Mobile App Container */
+.container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Header Styles - Professional Charcoal */
+.navbar {
+    background: linear-gradient(135deg, var(--header-color) 0%, #2C3E50 100%) !important;
+    border-bottom: 1px solid rgba(26, 37, 47, 0.3);
+    box-shadow: 0 2px 15px rgba(26, 37, 47, 0.2);
+    padding: var(--spacing-md) 0;
+    backdrop-filter: blur(10px);
+}
+
+/* Logo Styles */
+.navbar-brand .logo {
+    height: 32px;
+    width: auto;
+    filter: brightness(1.0) contrast(1.1);
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover .logo {
+    transform: scale(1.05);
+    filter: brightness(1.1) contrast(1.2);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: white !important;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-weight: 500;
+    margin: 0 var(--spacing-sm);
+    transition: all 0.3s ease;
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-xs) var(--spacing-sm) !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Navbar Toggler Styles */
+.navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.5);
+    padding: 4px 8px;
+}
+
+.navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Dropdown Menu Styles */
+.dropdown-menu {
+    background-color: rgba(255, 255, 255, 0.98);
+    border: 1px solid rgba(30, 74, 114, 0.2);
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 4px 20px rgba(30, 74, 114, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(30, 74, 114, 0.1);
+    color: var(--primary-color);
+}
+
+/* Card Styles */
+.card {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.card-header {
+    background-color: var(--medical-gray);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Button Styles */
+.btn {
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    padding: var(--spacing-sm) var(--spacing-md);
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #218838;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #c82333;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    border-color: var(--warning-color);
+    color: #1A202C;
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: #1A202C;
+    transform: translateY(-1px);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    border-color: var(--info-color);
+    color: white;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+    border-color: #138496;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Emergency Button */
+.btn-emergency {
+    background-color: var(--medical-red);
+    border-color: var(--medical-red);
+    color: white;
+    font-weight: 600;
+}
+
+.btn-emergency:hover {
+    background-color: #C41E3A;
+    border-color: #C41E3A;
+    color: white;
+}
+
+/* Form Styles */
+.form-control {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-base);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(30, 74, 114, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Alert Styles */
+.alert {
+    border-radius: var(--border-radius-md);
+    border: none;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger-color);
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    background-color: rgba(255, 165, 0, 0.1);
+    color: var(--warning-color);
+    border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: var(--info-color);
+    border-left: 4px solid var(--info-color);
+}
+
+/* Medical Dashboard Styles */
+.medical-dashboard {
+    padding: var(--spacing-lg);
+}
+
+.medical-stat-card {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    box-shadow: var(--shadow-md);
+}
+
+.medical-stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    display: block;
+}
+
+.medical-stat-label {
+    font-size: 1rem;
+    opacity: 0.9;
+    margin-top: var(--spacing-xs);
+}
+
+/* Emergency Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: var(--spacing-xs);
+}
+
+.status-active {
+    background-color: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+.status-inactive {
+    background-color: var(--text-muted);
+}
+
+.status-emergency {
+    background-color: var(--medical-red);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Medical Icons */
+.medical-icon {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-right: var(--spacing-sm);
+}
+
+.emergency-icon {
+    color: var(--medical-red);
+    font-size: 1.5rem;
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: var(--spacing-xl) 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.1;
+}
+
+.hero-section .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Medical Features */
+.medical-feature {
+    text-align: center;
+    padding: var(--spacing-lg);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.medical-feature:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.medical-feature-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.medical-feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.medical-feature-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Footer - Mobile App Design */
+.footer {
+    background-color: var(--primary-color);
+    color: white;
+    padding: var(--spacing-lg) 0;
+    margin-top: var(--spacing-xl);
+}
+
+.footer h5 {
+    color: white;
+    margin-bottom: var(--spacing-md);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.footer a {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+.footer a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Contact Info Mobile Design */
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) 0;
+}
+
+.contact-item i {
+    width: 20px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+}
+
+.contact-item a,
+.contact-item span {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+.contact-item a:hover {
+    color: white;
+    text-decoration: underline;
+}
+
+/* Mobile App Responsive Design */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: var(--spacing-lg) 0;
+    }
+    
+    .medical-stat-number {
+        font-size: 2rem;
+    }
+    
+    .medical-feature {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    /* Mobile Footer */
+    .footer {
+        padding: var(--spacing-md) 0;
+    }
+    
+    .footer .row {
+        text-align: center;
+    }
+    
+    .footer .col-md-4 {
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .footer h5 {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .contact-info {
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    .contact-item {
+        justify-content: center;
+        padding: var(--spacing-xs);
+    }
+    
+    .contact-item i {
+        width: 16px;
+        font-size: 0.8rem;
+    }
+    
+    .contact-item a,
+    .contact-item span {
+        font-size: 0.85rem;
+    }
+    
+    /* Mobile navigation */
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9rem;
+    }
+    
+    /* Mobile cards */
+    .card {
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .medical-feature {
+        padding: var(--spacing-md);
+    }
+    
+    .medical-feature-icon {
+        font-size: 2.5rem;
+    }
+    
+    /* Mobile App Bottom Safe Area */
+    .footer {
+        padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+    }
+    
+    /* Mobile App Status Bar */
+    body {
+        padding-top: env(safe-area-inset-top);
+    }
+    
+    /* Mobile App Touch Targets */
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .nav-link {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .contact-item a {
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Mobile App Viewport Meta */
+@media (max-width: 480px) {
+    .container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .hero-section {
+        padding: var(--spacing-md) 0;
+    }
+    
+    .footer {
+        padding: var(--spacing-sm) 0;
+    }
+    
+    .contact-item {
+        padding: var(--spacing-xs);
+    }
+    
+    .medical-feature {
+        padding: var(--spacing-sm);
+    }
+}
+
+/* Description Highlight Styling - Dark Floating Theme */
+.description-highlight {
+    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+    border: 1px solid rgba(41, 128, 185, 0.4);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin: var(--spacing-sm) 0;
+    box-shadow: 0 4px 12px rgba(26, 37, 47, 0.2), 0 2px 6px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(-1px);
+    transition: all 0.3s ease;
+    color: #ECF0F1;
+}
+
+.description-highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.description-text {
+    color: #ECF0F1 !important;
+    font-size: 1.1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.7 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    margin-bottom: 0 !important;
+}
+
+/* Step Description Styling - Dark Floating Theme */
+.step-description {
+    background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+    border: 1px solid rgba(41, 128, 185, 0.4);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-sm);
+    margin: var(--spacing-xs) 0;
+    box-shadow: 0 3px 10px rgba(26, 37, 47, 0.15), 0 1px 4px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+    transform: translateY(-0.5px);
+    transition: all 0.3s ease;
+}
+
+.step-description::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+}
+
+.step-description p {
+    color: #ECF0F1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.6;
+    margin-bottom: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.step-description:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(26, 37, 47, 0.25), 0 3px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(41, 128, 185, 0.6);
+}
+
+/* PWA Install Button Styling */
+.pwa-install-btn {
+    background: linear-gradient(135deg, var(--success-color), #20c997);
+    border: none;
+    border-radius: var(--border-radius-md);
+    color: white;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+.pwa-install-btn:hover {
+    background: linear-gradient(135deg, #20c997, var(--success-color));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+}
+
+.pwa-install-btn:active {
+    transform: translateY(0);
+}
+
+/* PWA Install Button Animation */
+@keyframes pulse-glow {
+    0% {
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 20px rgba(40, 167, 69, 0.8);
+    }
+}
+
+/* PWA Specific Styles */
+@media (display-mode: standalone) {
+    .pwa-install-btn {
+        display: none !important;
+    }
+    
+    body {
+        padding-top: 0;
+    }
+    
+    .navbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --border-color: #666666;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .navbar,
+    .footer,
+    .btn {
+        display: none !important;
+    }
+    
+    body {
+        color: black !important;
+        background: white !important;
+    }
+    
+    .card {
+        border: 1px solid black !important;
+        box-shadow: none !important;
+    }
+}
+
+/* Floating WhatsApp Community Button */
+.floating-whatsapp-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    animation: bounce 2s infinite;
+}
+
+.whatsapp-float-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #25D366 0%, #1fbe56 100%);
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.whatsapp-float-btn:hover {
+    background: linear-gradient(135deg, #1fbe56 0%, #25D366 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+    color: white;
+    text-decoration: none;
+    width: 180px;
+    border-radius: 28px;
+}
+
+.whatsapp-float-btn:focus {
+    outline: none;
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+}
+
+.whatsapp-float-btn .fab {
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.whatsapp-float-btn:hover .whatsapp-text {
+    opacity: 1;
+}
+
+.whatsapp-float-btn:active {
+    transform: translateY(0);
+}
+
+/* Bounce animation */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .floating-whatsapp-button {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .whatsapp-float-btn {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .whatsapp-float-btn:hover {
+        width: 160px;
+        border-radius: 25px;
+    }
+    
+    .whatsapp-float-btn .fab {
+        font-size: 20px;
+    }
+    
+    .whatsapp-text {
+        font-size: 12px;
+    }
+}
+
+/* Floating Feedback Button */
+.floating-feedback-button {
+    position: fixed;
+    bottom: 20px;
+    right: 100px; /* Position next to WhatsApp button */
+    z-index: 999;
+    animation: bounce 3s infinite;
+}
+
+.feedback-float-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #2980B9 0%, #3498DB 100%);
+    border-radius: 50%;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.4);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    cursor: pointer;
+    border: none;
+    outline: none;
+}
+
+.feedback-float-btn:hover {
+    background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(41, 128, 185, 0.6);
+    color: white;
+    text-decoration: none;
+    width: 180px;
+    border-radius: 28px;
+}
+
+.feedback-float-btn:focus {
+    outline: none;
+    box-shadow: 0 6px 20px rgba(41, 128, 185, 0.6);
+}
+
+.feedback-float-btn .fas {
+    font-size: 24px;
+    transition: all 0.3s ease;
+}
+
+.feedback-text {
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: nowrap;
+}
+
+.feedback-float-btn:hover .feedback-text {
+    opacity: 1;
+}
+
+.feedback-float-btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile responsive for feedback button */
+@media (max-width: 768px) {
+    .floating-feedback-button {
+        bottom: 15px;
+        right: 80px; /* Adjust for mobile */
+    }
+    
+    .feedback-float-btn {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .feedback-float-btn:hover {
+        width: 160px;
+        border-radius: 25px;
+    }
+    
+    .feedback-float-btn .fas {
+        font-size: 20px;
+    }
+    
+    .feedback-text {
+        font-size: 12px;
+    }
+}

@@ -1,0 +1,493 @@
+/* Gamification and Enhanced UI Styles */
+
+/* Drone Status Emoji Indicators */
+.drone-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.drone-status .emoji {
+    font-size: 1.5em;
+    animation: pulse 2s infinite;
+}
+
+.drone-status.available .emoji::before { content: "🚁"; color: #28a745; }
+.drone-status.in-flight .emoji::before { content: "🛩️"; color: #007bff; }
+.drone-status.maintenance .emoji::before { content: "🔧"; color: #ffc107; }
+.drone-status.offline .emoji::before { content: "📴"; color: #6c757d; }
+.drone-status.emergency .emoji::before { content: "🚨"; color: #dc3545; }
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Mission Criticality Color Scheme */
+.mission-critical {
+    background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+    border-left: 4px solid #dc3545;
+}
+
+.mission-high {
+    background: linear-gradient(135deg, #ffa726, #ffb74d);
+    border-left: 4px solid #ff9800;
+}
+
+.mission-medium {
+    background: linear-gradient(135deg, #66bb6a, #81c784);
+    border-left: 4px solid #4caf50;
+}
+
+.mission-low {
+    background: linear-gradient(135deg, #42a5f5, #64b5f6);
+    border-left: 4px solid #2196f3;
+}
+
+/* Gamification Badges */
+.badge-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.achievement-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.achievement-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.badge-first-mission {
+    background: linear-gradient(135deg, #e91e63, #f06292);
+    color: white;
+}
+
+.badge-speed-demon {
+    background: linear-gradient(135deg, #ff5722, #ff7043);
+    color: white;
+}
+
+.badge-life-saver {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    color: white;
+}
+
+.badge-trusted-partner {
+    background: linear-gradient(135deg, #2196f3, #42a5f5);
+    color: white;
+}
+
+.badge-emergency-hero {
+    background: linear-gradient(135deg, #ff9800, #ffa726);
+    color: white;
+}
+
+/* Interactive Timeline */
+.maintenance-timeline {
+    position: relative;
+    padding: 20px 0;
+    margin: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding: 20px 0 20px 50px;
+    border-left: 3px solid #e9ecef;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover {
+    background: rgba(52, 152, 219, 0.05);
+    border-radius: 8px;
+    margin-left: -10px;
+    padding-left: 60px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 25px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #3498db;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #3498db;
+}
+
+.timeline-item.completed::before {
+    background: #27ae60;
+    box-shadow: 0 0 0 3px #27ae60;
+}
+
+.timeline-item.in-progress::before {
+    background: #f39c12;
+    box-shadow: 0 0 0 3px #f39c12;
+    animation: pulse 2s infinite;
+}
+
+.timeline-item.scheduled::before {
+    background: #9b59b6;
+    box-shadow: 0 0 0 3px #9b59b6;
+}
+
+.timeline-content {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 4px solid #3498db;
+}
+
+.timeline-content h5 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+}
+
+.timeline-content p {
+    margin: 0;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+.timeline-time {
+    font-size: 0.8em;
+    color: #95a5a6;
+    margin-top: 8px;
+}
+
+/* Quick Action Floating Buttons - Improved Design */
+.quick-actions {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.quick-action-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6em;
+    color: white;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.quick-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn:hover::before {
+    width: 100%;
+    height: 100%;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.6);
+}
+
+.quick-action-emergency {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    animation: emergencyPulse 2s infinite;
+}
+
+.quick-action-request {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.quick-action-track {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.quick-action-support {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+@keyframes emergencyPulse {
+    0%, 100% { 
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    }
+    50% { 
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6);
+    }
+}
+
+/* Tooltip for Quick Actions */
+.quick-action-btn[data-tooltip] {
+    position: relative;
+}
+
+.quick-action-btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    margin-right: 10px;
+}
+
+.quick-action-btn:hover::after {
+    opacity: 1;
+}
+
+/* User Engagement Stats */
+.engagement-stats {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.engagement-stats h5 {
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.engagement-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.engagement-item {
+    text-align: center;
+    padding: 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.engagement-item:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
+}
+
+.engagement-item .number {
+    font-size: 1.5em;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.engagement-item .label {
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .quick-actions {
+        bottom: 15px;
+        right: 15px;
+    }
+    
+    .quick-action-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2em;
+    }
+    
+    .engagement-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .timeline-item {
+        padding-left: 40px;
+    }
+    
+    .timeline-item:hover {
+        margin-left: -5px;
+        padding-left: 45px;
+    }
+}
+
+/* Animation for new badges */
+@keyframes badgeAppear {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(180deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1) rotate(0deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+.achievement-badge.new {
+    animation: badgeAppear 0.6s ease;
+}
+
+/* Progress indicators */
+.progress-ring {
+    display: inline-block;
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.progress-ring svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-ring circle {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.progress-ring .bg {
+    stroke: #e9ecef;
+}
+
+.progress-ring .progress {
+    stroke: #3498db;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.progress-ring.complete .progress {
+    stroke: #27ae60;
+    stroke-dashoffset: 0;
+}
+
+.progress-ring .percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7em;
+    font-weight: 600;
+    color: #2c3e50;
+}
+/* Card-style quick actions */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.quick-action-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #e9ecef;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.quick-action-card .card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #3498db;
+}
+
+.quick-action-card h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.quick-action-card p {
+    color: #546e7a;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.quick-action-card .btn {
+    width: 100%;
+    font-weight: 600;
+    padding: 0.75rem;
+    border-radius: 8px;
+}
+
+.quick-action-card.emergency {
+    border-left: 4px solid #e74c3c;
+}
+
+.quick-action-card.emergency .card-icon {
+    color: #e74c3c;
+}
+
+.quick-action-card.routine {
+    border-left: 4px solid #27ae60;
+}
+
+.quick-action-card.routine .card-icon {
+    color: #27ae60;
+}
+
+.quick-action-card.info {
+    border-left: 4px solid #3498db;
+}
+
+.quick-action-card.info .card-icon {
+    color: #3498db;
+}
+

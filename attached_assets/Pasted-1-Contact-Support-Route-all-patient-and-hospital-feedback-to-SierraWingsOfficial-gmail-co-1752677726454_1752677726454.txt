@@ -1,0 +1,44 @@
+1. Contact & Support  
+   • Route all patient and hospital feedback to SierraWingsOfficial@gmail.com  
+   • Display this support email prominently in every UI mode  
+
+2. User Modes & Profile  
+   • Three distinct modes: Patient, Hospital, Admin  
+   • Fix the “Edit Profile” button in all modes so profile changes (name, email, password) are saved  
+
+3. Real‑Time Map & Location  
+   • Under Request Delivery → Delivery Address, include text entry and a “Use Current Location” option that captures live GPS  
+   • Show an interactive, live map in each mode displaying drones and delivery targets, auto‑refreshing every 30 seconds  
+
+4. Account Deletion  
+   • Add “Request Account Deletion” for Patient and Hospital  
+   • Send requests to Admin for approval, then delete account on approval  
+   • Show deletion request status in user profile  
+
+5. Maintenance & Broadcast Alerts  
+   • Display a full‑screen maintenance banner during maintenance mode  
+   • Build an “Update Panel” in Patient and Hospital modes for Admin to broadcast non‑auto‑dismiss notifications (users manually dismiss)  
+   • Include recent alerts with View, Edit, and Acknowledge actions  
+
+6. Drone Management & Wireless Connection  
+   • In Admin → Manage Drones, ensure Add/Edit/Remove/Launch/Land buttons work without errors  
+   • Add a “Wireless Connection” toggle to connect Raspberry Pi + Pixhawk drones via Wi‑Fi or cellular, showing real‑time status  
+
+7. Widgets & Quick Actions  
+   • Remove the three legacy quick‑action buttons  
+   • “My Deliveries” widget must show live user delivery data (no demo)  
+   • Ensure all widgets (weather, deliveries, alerts, drone status) are fully functional and collapsible via a “+” icon  
+   • Fix any 500 Internal Server Errors on widget actions  
+
+8. Weather Widget  
+   • Integrate a real‑time weather API (including wind speed)  
+   • Auto‑refresh every 30 seconds  
+   • Remove all placeholder/demo code  
+
+9. General UI/UX Fixes  
+   • Remove redundant Admin Action widget on Admin Dashboard  
+   • Ensure the “Drone Management” header button works everywhere  
+   • Fix all Help buttons to open the correct support dialog or mailto link  
+
+10. Settings Persistence  
+   • “Save Settings” buttons in all modes must persist changes  
